@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TradeLab - Trading Practice</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#252a33;--mu:#7b8190;--bd:#e3e6ea;--up:#16a34a;--dn:#e5383b;--pr:#ff5722;--bl:#387ed1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14161a;--card:#1d2026;--tx:#e6e8ec;--mu:#9097a3;--bd:#2c3037;color-scheme:dark}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--mu)}
+header{background:var(--card);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:16px;padding:8px 16px;flex-wrap:wrap}
+.logo{font-weight:700;color:var(--pr);font-size:18px}
+.idx{display:flex;gap:14px;font-size:13px}
+nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+nav button,.btn{background:none;border:0;padding:8px 12px;cursor:pointer;border-radius:4px}
+nav button.on{color:var(--pr);font-weight:600}
+.btn{border:1px solid var(--bd);background:var(--card)}
+.btn.p{background:var(--bl);color:#fff;border-color:var(--bl)}.btn.s{background:var(--pr);color:#fff;border-color:var(--pr)}
+.tick{background:#1f2937;color:#fff;overflow:hidden;white-space:nowrap;font-size:13px}
+.tick div{display:inline-block;padding:6px 0;animation:mv 80s linear infinite}
+.tick:hover div{animation-play-state:paused}
+.tick span{margin:0 18px}
+@keyframes mv{to{transform:translateX(-50%)}}
+#app{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 100px)}
+aside{background:var(--card);border-right:1px solid var(--bd)}
+main{padding:20px;min-width:0}
+@media(max-width:800px){#app{grid-template-columns:1fr}aside{border-right:0;max-height:420px;overflow:auto}}
+.pills{display:flex;flex-wrap:wrap;gap:4px;padding:8px}
+.pill{border:1px solid var(--bd);background:none;border-radius:14px;padding:3px 10px;cursor:pointer;font-size:12px}
+.pill.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+#search{width:calc(100% - 16px);margin:8px;padding:8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg)}
+.wl{display:flex;align-items:center;padding:9px 12px;border-top:1px solid var(--bd);gap:8px}
+.wl:hover{background:var(--bg)}
+.wl .n{flex:1;font-weight:500}.wl .c{width:62px;text-align:right;font-size:12px}.wl .pr{width:70px;text-align:right}
+.mini{border:0;border-radius:3px;padding:3px 8px;color:#fff;cursor:pointer;font-size:12px;font-weight:600}
+.mb{background:var(--bl)}.ms{background:var(--pr)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:16px;min-width:0}
+.card h3{margin:0 0 10px;font-size:15px;font-weight:600}
+.big{font-size:30px;font-weight:300}
+.row{display:flex;justify-content:space-between;padding:3px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:500}
+.scroll{overflow-x:auto}
+.tag{padding:2px 8px;border-radius:10px;font-size:11px;background:var(--bg)}
+.st-COMPLETE{color:var(--up)}.st-REJECTED,.st-CANCELLED{color:var(--dn)}.st-OPEN{color:var(--bl)}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+#ov.show{display:flex}
+#modal{background:var(--card);width:min(440px,94vw);border-radius:8px;overflow:hidden;max-height:94vh;overflow-y:auto}
+#mh{padding:14px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+#mh.BUY{background:var(--bl)}#mh.SELL{background:var(--pr)}
+#mb{padding:16px;display:grid;gap:12px}
+#mb label{display:grid;gap:4px;font-size:12px;color:var(--mu)}
+#mb input[type=number],#mb select{padding:8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg)}
+#mb input:disabled{opacity:.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rad{display:flex;gap:14px;color:var(--tx)}
+.err{color:var(--dn);font-size:13px;min-height:18px}
+#toast{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;padding:10px 16px;border-radius:6px;display:none;z-index:60}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+#login .card{width:min(360px,100%);display:grid;gap:12px}
+#login input{padding:10px;border:1px solid var(--bd);border-radius:4px;background:var(--bg);width:100%}
+svg text{fill:var(--mu);font-size:10px}
+#mbar{background:var(--card);border-bottom:1px solid var(--bd);padding:6px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px}
+#tc{margin-left:auto}#tc summary{cursor:pointer;color:var(--bl)}#tc .tcb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}
+#tc select,#tc input{padding:5px;border:1px solid var(--bd);border-radius:4px;background:var(--bg)}
+#xov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:55}#xov.show{display:flex}
+#xm{background:var(--card);width:min(420px,94vw);border-radius:8px;border-top:4px solid var(--pr);padding:16px;display:grid;gap:10px;animation:pop .22s ease-out;box-shadow:0 20px 60px rgba(229,56,59,.3);max-height:94vh;overflow-y:auto}
+#xm label{display:grid;gap:4px;font-size:12px;color:var(--mu)}#xm input[type=number]{padding:8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg)}
+#xm .seg{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:3px}
+#xm .seg label{position:relative;flex:1;display:block;text-align:center;padding:9px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
+#xm .seg input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.01;cursor:pointer}
+#xm .seg label:has(input:checked){background:var(--pr);color:#fff}
+#xSubmit{padding:12px;font-weight:700;border:0;background:linear-gradient(135deg,#b4232a,#f4575c)}
+.tag{margin-left:4px}details summary{cursor:pointer;font-size:11px}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--bl)}
+.ipo{display:grid;gap:8px;align-content:start}
+#ipov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:56}#ipov.show{display:flex}
+#ipm{background:var(--card);width:min(440px,94vw);border-radius:8px;border-top:4px solid var(--bl);padding:16px;display:grid;gap:10px;animation:pop .22s ease-out;max-height:94vh;overflow-y:auto}
+#ipm label{display:grid;gap:4px;font-size:12px;color:var(--mu)}#ipm input[type=number],#ipm input[type=text],#ipm select{padding:8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg);color:var(--tx)}
+#ipSubmit{padding:12px;font-weight:700;border:0}
+#gv{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:57}#gv.show{display:flex}
+#gm{background:var(--card);width:min(440px,94vw);border-radius:8px;border-top:4px solid var(--bl);padding:16px;display:grid;gap:10px;animation:pop .22s ease-out;max-height:94vh;overflow-y:auto}
+#gm label,.fl{display:grid;gap:4px;font-size:12px;color:var(--mu)}#gm input,#gm select,.fl input,.fl select{padding:8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg);color:var(--tx)}
+#otp{align-items:center;justify-content:center;min-height:100vh;padding:16px}
+#otp .card{width:min(380px,100%);display:grid;gap:12px}
+.otpbox{display:flex;gap:8px;justify-content:center}
+.otpd{width:44px;height:52px;text-align:center;font-size:22px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
+.otpd:focus{outline:2px solid var(--bl);border-color:var(--bl)}
+#modal{animation:pop .22s ease-out;border-top:4px solid var(--bl)}
+#modal.BUY{border-color:#16a34a;box-shadow:0 20px 60px rgba(22,163,74,.35)}
+#modal.SELL{border-color:#e5383b;box-shadow:0 20px 60px rgba(229,56,59,.35)}
+@keyframes pop{from{transform:scale(.92) translateY(10px);opacity:0}}
+#mh.BUY{background:linear-gradient(135deg,#0b7a43,#22c55e)}
+#mh.SELL{background:linear-gradient(135deg,#b4232a,#f4575c)}
+#mh b{font-size:20px}#mChg{font-size:12px;opacity:.9}
+#mSpark{margin-left:auto;margin-right:12px}#mSpark svg{width:110px;height:36px}
+#mb .seg{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:3px}
+#mb .seg label{position:relative;flex:1;display:block;text-align:center;padding:9px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;color:var(--mu)}
+#mb .seg input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.01;cursor:pointer}
+#mb .seg label:has(input:checked){background:var(--card);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+#mb #segSide label.b:has(input:checked){background:#16a34a;color:#fff}
+#mb #segSide label.s:has(input:checked){background:#e5383b;color:#fff}
+.sum{background:var(--bg);border-radius:8px;padding:8px 12px}
+#oSubmit{padding:12px;font-weight:700;font-size:15px;border:0}
+#oSubmit.p{background:linear-gradient(135deg,#0b7a43,#22c55e);box-shadow:0 6px 16px rgba(22,163,74,.4)}
+#oSubmit.s{background:linear-gradient(135deg,#b4232a,#f4575c);box-shadow:0 6px 16px rgba(229,56,59,.4)}
+</style></head><body>
+
+<div id="login" data-testid="login-page">
+ <div class="card">
+  <div class="logo">TradeLab</div><div class="mu">Trading practice app. Demo user: <b>DEMO01</b> / <b>Test@123</b>, then OTP <b>123456</b></div>
+  <input id="userId" data-testid="login-userid" placeholder="User ID" autocomplete="off">
+  <input id="password" data-testid="login-password" type="password" placeholder="Password">
+  <div id="loginErr" class="err" data-testid="login-error" role="alert"></div>
+  <button id="loginBtn" class="btn s" data-testid="login-submit">Login</button>
+ </div>
+</div>
+
+<div id="otp" data-testid="otp-page" style="display:none"><div class="card"><div class="logo">TradeLab</div><h3 style="margin:0">Two-step verification</h3>
+ <div class="mu">Enter the 6-digit OTP for <b id="otpUser" data-testid="otp-user"></b>. Demo OTP: <b>123456</b></div>
+ <div class="otpbox" data-testid="otp-boxes"><input class="otpd" data-testid="otp-digit-1" inputmode="numeric" maxlength="1" aria-label="OTP digit 1" autocomplete="off"><input class="otpd" data-testid="otp-digit-2" inputmode="numeric" maxlength="1" aria-label="OTP digit 2" autocomplete="off"><input class="otpd" data-testid="otp-digit-3" inputmode="numeric" maxlength="1" aria-label="OTP digit 3" autocomplete="off"><input class="otpd" data-testid="otp-digit-4" inputmode="numeric" maxlength="1" aria-label="OTP digit 4" autocomplete="off"><input class="otpd" data-testid="otp-digit-5" inputmode="numeric" maxlength="1" aria-label="OTP digit 5" autocomplete="off"><input class="otpd" data-testid="otp-digit-6" inputmode="numeric" maxlength="1" aria-label="OTP digit 6" autocomplete="off"></div>
+ <div id="otpErr" class="err" data-testid="otp-error" role="alert"></div>
+ <button id="otpBtn" class="btn s" data-testid="otp-submit">Verify and continue</button>
+ <button id="otpResend" class="btn" data-testid="otp-resend" disabled>Resend OTP</button>
+ <button id="otpBack" class="btn" data-testid="otp-back">Back to login</button></div></div>
+<div id="shell" style="display:none">
+<header>
+ <span class="logo">TradeLab</span>
+ <div class="idx"><span data-testid="hdr-nifty">NIFTY 50 <b id="hN"></b></span><span data-testid="hdr-sensex">SENSEX <b id="hS"></b></span></div>
+ <nav data-testid="top-nav">
+  <button data-v="dashboard" data-testid="nav-dashboard">Dashboard</button>
+  <button data-v="orders" data-testid="nav-orders">Orders</button>
+  <button data-v="trades" data-testid="nav-trades">Trades</button>
+  <button data-v="holdings" data-testid="nav-holdings">Holdings</button>
+  <button data-v="positions" data-testid="nav-positions">Positions</button>
+  <button data-v="gtt" data-testid="nav-gtt">GTT</button>
+  <button data-v="basket" data-testid="nav-basket">Basket</button>
+  <button data-v="ipo" data-testid="nav-ipo">IPO</button>
+  <button data-v="funds" data-testid="nav-funds">Funds</button>
+  <button class="btn" id="resetBtn" data-testid="reset-data">Reset data</button>
+  <button class="btn" id="logoutBtn" data-testid="logout">Logout</button>
+ </nav>
+</header>
+<div class="tick" data-testid="ticker"><div id="tickIn"></div></div>
+<div id='mbar' data-testid='market-bar'><span>Market <b id='mkSt' data-testid='market-status'></b></span><span>Session #<b id='mkSess' data-testid='market-session'></b></span><span>Start <b id='mkS' data-testid='market-start'></b></span><span>Closes <b id='mkC' data-testid='market-close'></b></span><span>Remaining <b id='mkR' data-testid='market-remaining'></b></span><span>Auto square-off <b id='mkSq' data-testid='market-squareoff'></b></span>
+<details id='tc' data-testid='test-controls'><summary>Test controls</summary><div class='tcb'>
+<label>Duration <select id='mkDur' data-testid='mkt-duration'><option value='1'>1 min</option><option value='2'>2 min</option><option value='5'>5 min</option><option value='15'>15 min</option><option value='30'>30 min</option><option value='60'>60 min</option></select></label>
+<label>MIS auto square-off <select id='mkSqSel' data-testid='mkt-squareoff'><option value='5'>5 min before close</option><option value='2'>2 min before close</option><option value='0'>Off</option></select></label>
+<label>Partial fills <select id='mkPf' data-testid='mkt-partial'><option value='0'>Off</option><option value='1'>On (40% then rest)</option></select></label>
+<label>T+1 rule <select id='mkT1' data-testid='mkt-t1'><option value='1'>Enforce</option><option value='0'>Off</option></select></label>
+<label>Charges <select id='mkCh' data-testid='mkt-charges'><option value='1'>On</option><option value='0'>Off</option></select></label>
+<button class='btn' id='mkNow' data-testid='mkt-close-now'>Close market now</button><button class='btn' id='mkNext' data-testid='mkt-start-next'>Start next session</button><button class='btn' id='mkFf' data-testid='mkt-fast-forward'>+5 min</button>
+<label>Prices <select id='simMode' data-testid='sim-mode'><option value='off'>Fixed</option><option value='auto'>Auto</option></select></label>
+<label>Every <select id='simIv' data-testid='sim-interval'><option value='2'>2s</option><option value='5'>5s</option><option value='10'>10s</option></select></label>
+<button class='btn' id='simStep' data-testid='sim-step'>Step prices</button>
+<label>Set LTP <select id='ltpSym' data-testid='ltp-symbol'></select> <input type='number' id='ltpVal' data-testid='ltp-value' step='0.05' style='width:90px'> <button class='btn' id='ltpSet' data-testid='ltp-set'>Set</button></label>
+</div></details></div>
+<div id="app">
+ <aside data-testid="watchlist">
+  <input id="search" data-testid="watchlist-search" placeholder="Search eg: infy, tcs, sbin">
+  <div class="pills" id="pills" data-testid="watchlist-tabs"></div>
+  <div id="wlRows"></div>
+ </aside>
+ <main id="main"></main>
+</div>
+</div>
+
+<div id="ov" data-testid="order-overlay"><div id="modal" role="dialog" aria-modal="true" data-testid="order-modal">
+ <div id="mh"><div><b id="mSym" data-testid="order-symbol"></b> <span id="mLtp" data-testid="order-ltp"></span><div id="mChg" data-testid="order-change"></div></div><div id="mSpark"></div><button class="btn" id="mClose" data-testid="order-close">✕</button></div>
+ <div id="mb">
+  <div class="seg" id="segSide"><label class="b"><input type="radio" name="side" value="BUY" data-testid="side-buy">BUY</label><label class="s"><input type="radio" name="side" value="SELL" data-testid="side-sell">SELL</label></div>
+  <div class="seg"><label><input type="radio" name="prod" value="CNC" data-testid="prod-cnc" checked>CNC (Delivery)</label><label><input type="radio" name="prod" value="MIS" data-testid="prod-mis">MIS (Intraday)</label></div>
+  <div class="two"><label>Qty<input type="number" id="oQty" data-testid="order-qty" min="1" value="1"></label>
+  <label>Order type<select id="oType" data-testid="order-type"><option>MARKET</option><option>LIMIT</option><option>SL</option><option>SL-M</option></select></label></div>
+  <div class="two"><label>Price<input type="number" id="oPrice" data-testid="order-price" step="0.05"></label>
+  <label>Trigger price<input type="number" id="oTrig" data-testid="order-trigger" step="0.05"></label></div>
+  <div class="two"><label>Validity<select id="oVal" data-testid="order-validity"><option>DAY</option><option>IOC</option></select></label>
+  <label class="rad" style="align-self:end"><input type="checkbox" id="oAmo" data-testid="order-amo"> AMO (after market)</label></div>
+  <div class="sum"><div class="row"><span class="mu">Margin required</span><b id="oMargin" data-testid="order-margin"></b></div><div class="row"><span class="mu">Available margin</span><b id="oAvail" data-testid="order-available"></b></div><div class="row"><span class="mu">Balance after order</span><b id="oAfter" data-testid="order-after"></b></div></div>
+  <div class="mu" id="oNote" data-testid="order-market-note"></div><div class="mu" id="oInfo" data-testid="order-info"></div><div class="err" id="oErr" data-testid="order-error" role="alert"></div>
+  <button id="oSubmit" class="btn p" data-testid="order-submit">Buy</button>
+ </div></div></div>
+<div id='xov' data-testid='exit-overlay'><div id='xm' role='dialog' aria-modal='true' data-testid='exit-modal'>
+<div class='row'><b>Exit position <span id='xSym' data-testid='exit-symbol'></span></b><button class='btn' id='xClose' data-testid='exit-close'>✕</button></div>
+<div class='sum'><div class='row'><span class='mu'>Available quantity</span><b id='xAvail' data-testid='exit-available'></b></div><div class='row'><span class='mu'>Average price</span><b id='xAvg' data-testid='exit-avg'></b></div><div class='row'><span class='mu'>Current LTP</span><b id='xLtp' data-testid='exit-ltp'></b></div><div class='row'><span class='mu'>Exit order type</span><b id='xTypeTxt' data-testid='exit-type-text'></b></div><div class='row'><span class='mu'>Limit price</span><b id='xLimTxt' data-testid='exit-limit-text'></b></div><div class='row'><span class='mu'>Estimated P&amp;L</span><b id='xPl' data-testid='exit-est-pnl'></b></div></div>
+<div class='seg'><label><input type='radio' name='xt' value='MARKET' data-testid='exit-type-market' checked>Market exit</label><label><input type='radio' name='xt' value='LIMIT' data-testid='exit-type-limit'>Limit exit</label></div>
+<label>Exit quantity<input type='number' id='xQty' data-testid='exit-qty' min='1'></label><label>Limit price<input type='number' id='xPx' data-testid='exit-price' step='0.05'></label>
+<div class='err' id='xErr' data-testid='exit-error' role='alert'></div><button class='btn s' id='xSubmit' data-testid='exit-confirm'>Confirm exit</button></div></div>
+<div id='ipov' data-testid='ipo-overlay'><div id='ipm' role='dialog' aria-modal='true' data-testid='ipo-modal'>
+<div class='row'><b>Apply: <span id='ipN' data-testid='ipo-apply-name'></span></b><button class='btn' id='ipClose' data-testid='ipo-close'>✕</button></div>
+<div class='sum'><div class='row'><span class='mu'>Price band</span><b id='ipBand' data-testid='ipo-modal-band'></b></div><div class='row'><span class='mu'>Lot size</span><b id='ipLot' data-testid='ipo-modal-lot'></b></div><div class='row'><span class='mu'>Minimum investment</span><b data-testid='ipo-modal-min'>₹15,000</b></div></div>
+<label>Category<select id='ipCat' data-testid='ipo-category'><option value='RETAIL'>Retail (up to ₹2,00,000)</option><option value='NII'>NII / HNI (above ₹2,00,000)</option></select></label>
+<label>Lots<input type='number' id='ipLots' data-testid='ipo-lots' min='1' value='1'></label>
+<label style='display:flex;gap:8px;align-items:center;color:var(--tx)'><input type='checkbox' id='ipCut' data-testid='ipo-cutoff' checked> Bid at cut-off price (upper band)</label>
+<label>Bid price<input type='number' id='ipPx' data-testid='ipo-price' step='0.05'></label>
+<label>UPI ID<input type='text' id='ipUpi' data-testid='ipo-upi' placeholder='name@okbank' autocomplete='off'></label>
+<div class='sum'><div class='row'><span class='mu'>Quantity (shares)</span><b id='ipQty' data-testid='ipo-qty'></b></div><div class='row'><span class='mu'>Amount to be blocked</span><b id='ipAmt' data-testid='ipo-amount'></b></div></div>
+<div class='err' id='ipErr' data-testid='ipo-error' role='alert'></div><button class='btn p' id='ipSubmit' data-testid='ipo-submit'>Apply</button></div></div>
+<div id='gv' data-testid='gtt-overlay'><div id='gm' role='dialog' aria-modal='true' data-testid='gtt-modal'>
+<div class='row'><b id='gTitle' data-testid='gtt-title'>New GTT</b><button class='btn' id='gClose' data-testid='gtt-close'>✕</button></div>
+<label>Type<select id='gType' data-testid='gtt-type'><option value='SINGLE'>Single (one trigger)</option><option value='OCO'>OCO (stoploss + target)</option></select></label>
+<label>Stock<select id='gSym' data-testid='gtt-symbol'></select></label><div class='mu' id='gLtp' data-testid='gtt-ltp'></div>
+<label id='gSideL'>Transaction<select id='gSide' data-testid='gtt-side'><option>BUY</option><option>SELL</option></select></label>
+<label>Quantity<input type='number' id='gQty' data-testid='gtt-qty' min='1' value='1'></label>
+<div class='two'><label><span id='gT1T'>Trigger price</span><input type='number' id='gT1' data-testid='gtt-trigger' step='0.05'></label><label><span id='gP1T'>Limit price</span><input type='number' id='gP1' data-testid='gtt-price' step='0.05'></label></div>
+<div class='two' id='gLeg2'><label>Target trigger<input type='number' id='gT2' data-testid='gtt-target-trigger' step='0.05'></label><label>Target limit price<input type='number' id='gP2' data-testid='gtt-target-price' step='0.05'></label></div>
+<div class='err' id='gErr' data-testid='gtt-error' role='alert'></div><button class='btn p' id='gSubmit' data-testid='gtt-submit'>Create GTT</button></div></div>
+<div id="toast" data-testid="toast" role="status"></div>
+
+<script>
+const SEC={
+IT:"TCS:3920:1.8,INFY:1560:-0.9,WIPRO:485:2.4,HCLTECH:1680:-1.6,TECHM:1490:0.7,LTIM:5420:-2.3,MPHASIS:2850:1.1,COFORGE:6120:3.2,PERSISTENT:5380:-0.4,OFSS:9200:0.3",
+Banking:"HDFCBANK:1720:0.6,ICICIBANK:1245:1.4,SBIN:812:-1.2,KOTAKBANK:1790:-0.5,AXISBANK:1180:2.1,INDUSINDBK:1010:-3.4,BANKBARODA:255:0.9,PNB:112:-2.0,CANBK:108:1.7,FEDERALBNK:198:0.2",
+Auto:"MARUTI:12400:0.8,TATAMOTORS:980:-1.9,BHARATFORG:1420:2.6,BAJAJ-AUTO:9100:-0.7,EICHERMOT:4850:1.3,HEROMOTOCO:4520:-2.8,TVSMOTOR:2480:3.5,ASHOKLEY:235:-0.3,BOSCHLTD:33100:0.4,MOTHERSON:165:1.9",
+Pharma:"SUNPHARMA:1780:1.2,CIPLA:1520:-0.8,DRREDDY:6250:-1.7,DIVISLAB:5900:2.9,LUPIN:2100:0.5,AUROPHARMA:1290:-2.4,TORNTPHARM:3450:1.6,ZYDUSLIFE:980:-0.2,APOLLOHOSP:7100:0.9,BIOCON:335:3.8",
+Energy:"RELIANCE:2890:-0.6,ONGC:270:1.5,NTPC:365:2.2,POWERGRID:320:-1.1,COALINDIA:465:0.8,BPCL:610:-2.6,IOC:168:0.4,TATAPOWER:430:3.1,ADANIGREEN:1850:-3.9,GAIL:205:1.0",
+FMCG:"HINDUNILVR:2410:-0.4,ITC:465:0.7,NESTLEIND:2520:0.2,BRITANNIA:5100:-1.3,DABUR:540:1.8,MARICO:640:2.0,GODREJCP:1280:-2.1,TATACONSUM:1130:0.9,COLPAL:2850:-0.6,UBL:1980:1.4",
+Metals:"TATASTEEL:155:2.7,JSWSTEEL:920:-1.8,HINDALCO:640:1.9,VEDL:440:-3.2,SAIL:128:0.6,NMDC:232:3.3,JINDALSTEL:960:-0.9,NALCO:190:4.1,HINDZINC:520:-2.2,APLAPOLLO:1520:1.1"};
+const S={},ALL=[];
+for(const k in SEC)SEC[k]=SEC[k].split(",").map(x=>{const[a,b,c]=x.split(":");const o={s:a,p:+b,p0:+b,c:+c,pc:+b/(1+ +c/100),sec:k};S[a]=o;ALL.push(o);return o});
+const IDX={NIFTY:{v:24350.4,c:0.42,seed:7},SENSEX:{v:79800.2,c:0.38,seed:11}};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const f=n=>Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const cl=n=>n>=0?"up":"dn",sg=n=>(n>0?"+":"")+f(n);
+const KEY="kitelab_v1";
+const seed=()=>({cash:100000,n:1000,orders:[],pos:[],hh:[],ipoA:[],gtt:[],bk:[],tr:[],px:{},mkt:{dur:60,start:Date.now(),st:'OPEN',sess:1,sim:'off',iv:5,sq:5,pf:0,t1:1,ch:1,tick:0},hold:[{s:"TCS",q:10,a:3700},{s:"INFY",q:20,a:1500},{s:"SBIN",q:50,a:700},{s:"ITC",q:100,a:400},{s:"TATASTEEL",q:100,a:140}]});
+let D;try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){}D=D&&D.mkt?D:seed();applyPx();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}};
+let view="dashboard",sec="IT",q="",ptab="open";
+const used=()=>D.pos.reduce((t,p)=>t+Math.abs(p.q)*p.a/lev(p.s),0),avail=()=>D.cash-used()-ipoBlk();
+function toast(m){const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",2600)}
+
+/* login */
+$("#loginBtn").onclick=()=>{const u=$("#userId").value.trim(),p=$("#password").value;
+ if(!u||!p)return $("#loginErr").textContent="User ID and password are required";
+ if(u.toUpperCase()!=="DEMO01"||p!=="Test@123")return $("#loginErr").textContent="Invalid user ID or password";
+ pend=u.toUpperCase();showOtp()};
+$("#password").onkeydown=e=>{if(e.key==="Enter")$("#loginBtn").click()};
+/* mandatory OTP on every login */
+let pend="",tries=0,tm;const OTP="123456",dg=()=>$$(".otpd");
+function showOtp(){tries=0;$("#login").style.display="none";$("#otp").style.display="flex";$("#otpUser").textContent=pend;dg().forEach(d=>d.value="");$("#otpErr").textContent="";dg()[0].focus();cd(15)}
+function cd(n){clearInterval(tm);const b=$("#otpResend");b.disabled=true;b.textContent="Resend OTP in "+n+"s";tm=setInterval(()=>{n--;if(n<=0){clearInterval(tm);b.disabled=false;b.textContent="Resend OTP"}else b.textContent="Resend OTP in "+n+"s"},1000)}
+dg().forEach((d,i)=>{d.oninput=()=>{d.value=d.value.replace(/\D/g,"").slice(-1);if(d.value&&i<5)dg()[i+1].focus()};d.onkeydown=e=>{if(e.key=="Backspace"&&!d.value&&i>0)dg()[i-1].focus();if(e.key=="Enter")$("#otpBtn").click()};d.onpaste=e=>{const t=(e.clipboardData.getData("text")||"").replace(/\D/g,"").slice(0,6);if(t){e.preventDefault();dg().forEach((x,j)=>x.value=t[j]||"");dg()[Math.min(t.length,5)].focus()}}});
+$("#otpBtn").onclick=()=>{const v=dg().map(d=>d.value).join(""),E=m=>$("#otpErr").textContent=m;
+ if(v.length<6)return E("Enter the 6-digit OTP");
+ if(v!==OTP){tries++;dg().forEach(d=>d.value="");dg()[0].focus();if(tries>=3){clearInterval(tm);$("#otp").style.display="none";$("#login").style.display="flex";$("#loginErr").textContent="Too many wrong OTP attempts. Please login again.";return}return E("Invalid OTP. Attempts left: "+(3-tries))}
+ clearInterval(tm);try{sessionStorage.setItem("kl_user",pend)}catch(e){}$("#otp").style.display="none";start()};
+$("#otpResend").onclick=()=>{$("#otpErr").textContent="";toast("OTP sent (demo OTP is 123456)");cd(15)};
+$("#otpBack").onclick=()=>{clearInterval(tm);$("#otp").style.display="none";$("#login").style.display="flex"};
+$("#logoutBtn").onclick=()=>{try{sessionStorage.removeItem("kl_user")}catch(e){}$("#shell").style.display="none";$("#login").style.display="flex";$("#password").value="";$("#loginErr").textContent=""};
+$("#resetBtn").onclick=()=>{D=seed();applyPx();lastStep=0;save();tk();render();mbar();toast('Data reset to defaults')};
+function start(){$("#login").style.display="none";$("#shell").style.display="block";$("#hN").innerHTML=idxTxt("NIFTY");$("#hS").innerHTML=idxTxt("SENSEX");
+ $("#tickIn").innerHTML=(t=>t+t)(ALL.map(x=>`<span data-testid="ticker-${x.s}">${x.s} <b class="${x.c>=0?"up":"dn"}" style="color:${x.c>=0?"#4ade80":"#f87171"}">${f(x.p)} ${x.c>=0?"▲":"▼"} ${Math.abs(x.c).toFixed(2)}%</b></span>`).join(""));
+ const h=location.hash.slice(1);if(["dashboard","orders","holdings","positions","ipo","trades","gtt","basket","funds"].includes(h))view=h;render();mbar()}
+const idxTxt=k=>`<span class="${cl(IDX[k].c)}">${f(IDX[k].v)} ${IDX[k].c>0?"+":""}${IDX[k].c}%</span>`;
+
+/* nav + watchlist */
+$$("nav [data-v]").forEach(b=>b.onclick=()=>{view=b.dataset.v;location.hash=view;render()});
+$("#search").oninput=e=>{q=e.target.value.trim().toUpperCase();wl()};
+function wl(){
+ $("#pills").innerHTML=Object.keys(SEC).map(k=>`<button class="pill ${k==sec&&!q?"on":""}" data-testid="wl-tab-${k}" data-s="${k}">${k}</button>`).join("");
+ $$("#pills .pill").forEach(b=>b.onclick=()=>{sec=b.dataset.s;$("#search").value="";q="";wl()});
+ const list=q?ALL.filter(x=>x.s.includes(q)):SEC[sec];
+ $("#wlRows").innerHTML=list.length?list.map(x=>`<div class="wl" data-testid="wl-row-${x.s}"><span class="n ${cl(x.c)}" data-testid="wl-name-${x.s}">${x.s}</span><span class="c ${cl(x.c)}" data-testid="wl-chg-${x.s}">${x.c>0?"+":""}${x.c.toFixed(2)}% ${x.c>=0?"▲":"▼"}</span><span class="pr ${cl(x.c)}" data-testid="wl-ltp-${x.s}">${f(x.p)}</span><button class="mini mb" data-testid="buy-${x.s}" data-b="${x.s}">B</button><button class="mini ms" data-testid="sell-${x.s}" data-sl="${x.s}">S</button></div>`).join(""):`<div class="wl mu" data-testid="wl-empty">No stocks found</div>`;
+ $$("[data-b]").forEach(b=>b.onclick=()=>openOrder(b.dataset.b,"BUY"));
+ $$("[data-sl]").forEach(b=>b.onclick=()=>openOrder(b.dataset.sl,"SELL"));
+}
+
+/* charts */
+function chart(k,id){const I=IDX[k];let s=I.seed*9973,r=()=>(s=(s*16807)%2147483647)/2147483647;
+ const n=60,start=I.v/(1+I.c/100),pts=[];let v=start*0.996;
+ for(let i=0;i<n;i++){v+=(r()-0.46)*start*0.0016+(start*(1+I.c/100)-v)*0.03;pts.push(v)}pts[n-1]=I.v;
+ const mn=Math.min(...pts),mx=Math.max(...pts),W=420,H=160,P=34;
+ const xy=pts.map((y,i)=>[P+i*(W-P-6)/(n-1),8+(H-24)*(1-(y-mn)/(mx-mn))]);
+ const line=xy.map(a=>a.join(",")).join(" "),col=I.c>=0?"#16a34a":"#e5383b";
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${k} chart" data-testid="chart-${id}"><polygon points="${P},${H-16} ${line} ${W-6},${H-16}" fill="${col}" opacity=".12"/><polyline points="${line}" fill="none" stroke="${col}" stroke-width="2"/><text x="0" y="14">${f(mx)}</text><text x="0" y="${H-18}">${f(mn)}</text><text x="${P}" y="${H-3}">9:15</text><text x="${W/2}" y="${H-3}">12:30</text><text x="${W-34}" y="${H-3}">15:30</text></svg>`}
+
+/* views */
+function totals(){let inv=0,cur=0,day=0;D.hold.forEach(h=>{const p=S[h.s].p;inv+=h.q*h.a;cur+=h.q*p;day+=h.q*p*S[h.s].c/100});return{inv,cur,day,pnl:cur-inv}}
+function posPnl(p){return p.r+(p.q?(S[p.s].p-p.a)*p.q:0)}
+const V={
+dashboard(){const t=totals(),op=D.pos.filter(p=>p.q),pp=D.pos.reduce((a,p)=>a+posPnl(p),0);
+ return `<h2 data-testid="greeting">Hi, DEMO01</h2>
+ <div class="grid"><div class="card" data-testid="card-equity"><h3>Equity</h3><div class="big" data-testid="avail-margin">${f(avail())}</div><div class="mu">Available margin</div>
+  <div class="row"><span>Margin used</span><b data-testid="used-margin">${f(used())}</b></div><div class="row"><span>Opening balance</span><b>${f(D.cash)}</b></div></div>
+ <div class="card" data-testid="card-holdings"><h3>Holdings (${D.hold.length})</h3><div class="big ${cl(t.pnl)}" data-testid="dash-hold-pnl">${sg(t.pnl)}</div><div class="mu">P&amp;L</div>
+  <div class="row"><span>Current value</span><b>${f(t.cur)}</b></div><div class="row"><span>Investment</span><b>${f(t.inv)}</b></div><div class="row"><span>Day change</span><b class="${cl(t.day)}">${sg(t.day)}</b></div></div>
+ <div class="card" data-testid="card-positions"><h3>Positions (${op.length})</h3><div class="big ${cl(pp)}" data-testid="dash-pos-pnl">${sg(pp)}</div><div class="mu">Total P&amp;L</div></div></div>
+ <div class="card" data-testid="market-overview"><h3>Market overview</h3><div class="grid" style="margin:0">
+  <div><b>NIFTY 50</b> ${idxTxt("NIFTY")}${chart("NIFTY","nifty50")}</div><div><b>SENSEX</b> ${idxTxt("SENSEX")}${chart("SENSEX","sensex")}</div></div></div>
+ <div class="grid" style="margin-top:16px"><div class="card" data-testid="top-gainers"><h3>Top gainers</h3>${[...ALL].sort((a,b)=>b.c-a.c).slice(0,5).map(x=>`<div class="row"><span>${x.s}</span><b class="up">+${x.c.toFixed(2)}%</b></div>`).join("")}</div>
+ <div class="card" data-testid="top-losers"><h3>Top losers</h3>${[...ALL].sort((a,b)=>a.c-b.c).slice(0,5).map(x=>`<div class="row"><span>${x.s}</span><b class="dn">${x.c.toFixed(2)}%</b></div>`).join("")}</div></div>`},
+orders(){const o=[...D.orders].reverse();
+ return `<h2>Orders (${o.length})</h2><div class="card scroll"><table data-testid="orders-table"><tr><th>Time</th><th>Type</th><th>Instrument</th><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th></th></tr>
+ ${o.length?o.map(x=>{const op=x.st==="OPEN"||x.st==="AMO REQ RECEIVED";return `<tr data-testid="order-row-${x.id}"><td>${x.t}</td><td class="${x.side=="BUY"?"up":"dn"}" data-testid="order-side-${x.id}">${x.side}</td><td data-testid="order-sym-${x.id}">${x.s}</td><td>${x.prod} / ${x.type}${x.amo?" / AMO":""}</td><td>${x.q}</td><td>${f(x.px)}</td><td class="st-${x.st.split(" ")[0]=="AMO"?"OPEN":x.st}" data-testid="order-status-${x.id}">${x.st}${x.why?` <span class="mu">(${x.why})</span>`:""}</td>
+ <td>${op?`<button class="btn" data-mod="${x.id}" data-testid="modify-${x.id}">Modify</button> <button class="btn" data-exec="${x.id}" data-testid="execute-${x.id}">Execute</button> <button class="btn" data-can="${x.id}" data-testid="cancel-${x.id}">Cancel</button>`:""}</td></tr>`}).join(""):`<tr><td colspan="8" class="mu" data-testid="orders-empty">No orders yet</td></tr>`}</table></div>`},
+holdings(){const t=totals();
+ return `<h2>Holdings (${D.hold.length})</h2><div class="grid"><div class="card"><div class="mu">Total investment</div><b data-testid="hold-inv">${f(t.inv)}</b></div><div class="card"><div class="mu">Current value</div><b data-testid="hold-cur">${f(t.cur)}</b></div><div class="card"><div class="mu">Total P&amp;L</div><b class="${cl(t.pnl)}" data-testid="hold-pnl">${sg(t.pnl)} (${(t.inv?t.pnl/t.inv*100:0).toFixed(2)}%)</b></div></div>
+ <div class="card scroll"><table data-testid="holdings-table"><tr><th>Instrument</th><th>Qty</th><th>Avg cost</th><th>LTP</th><th>Cur val</th><th>P&amp;L</th><th>Day chg</th><th></th></tr>
+ ${D.hold.length?D.hold.map(h=>{const x=S[h.s],p=(x.p-h.a)*h.q;return `<tr data-testid="holding-row-${h.s}"><td>${h.s}</td><td data-testid="holding-qty-${h.s}">${h.q}</td><td data-testid="holding-avg-${h.s}">${f(h.a)}</td><td>${f(x.p)}</td><td>${f(x.p*h.q)}</td><td class="${cl(p)}" data-testid="holding-pnl-${h.s}">${sg(p)}</td><td class="${cl(x.c)}">${x.c>0?"+":""}${x.c.toFixed(2)}%</td><td><button class="mini mb" data-b="${h.s}" data-testid="hold-buy-${h.s}">B</button> <button class="mini ms" data-sl="${h.s}" data-testid="hold-sell-${h.s}">S</button></td></tr>`}).join(""):`<tr><td colspan="8" class="mu" data-testid="holdings-empty">No holdings</td></tr>`}</table></div>`},
+positions(){const l=D.pos.filter(p=>ptab=="open"?p.q:!p.q);
+ return `<h2>Positions</h2><div class="pills"><button class="pill ${ptab=="open"?"on":""}" data-pt="open" data-testid="pos-tab-open">Open (${D.pos.filter(p=>p.q).length})</button><button class="pill ${ptab=="closed"?"on":""}" data-pt="closed" data-testid="pos-tab-closed">Closed (${D.pos.filter(p=>!p.q).length})</button></div>
+ <div class="card scroll"><table data-testid="positions-table"><tr><th>Instrument</th><th>Product</th><th>Qty</th><th>Avg</th><th>LTP</th><th>P&amp;L</th><th></th></tr>
+ ${l.length?l.map(p=>`<tr data-testid="position-row-${p.s}"><td>${p.s}</td><td>MIS</td><td data-testid="position-qty-${p.s}">${p.q}</td><td>${f(p.a)}</td><td>${f(S[p.s].p)}</td><td class="${cl(posPnl(p))}" data-testid="position-pnl-${p.s}">${sg(posPnl(p))}</td><td>${p.q?`<button class="btn" data-sq="${p.s}" data-testid="squareoff-${p.s}">Exit</button>`:""}</td></tr>`).join(""):`<tr><td colspan="7" class="mu" data-testid="positions-empty">No ${ptab} positions</td></tr>`}</table></div>`},
+funds(){return `<h2>Funds</h2><div class="grid"><div class="card" data-testid="funds-card"><h3>Equity</h3>
+ <div class="row"><span>Available margin</span><b data-testid="funds-avail">${f(avail())}</b></div><div class="row"><span>Used margin</span><b data-testid="funds-used">${f(used())}</b></div><div class="row"><span>Available cash</span><b data-testid="funds-cash">${f(D.cash)}</b></div></div>
+ <div class="card"><h3>Add / withdraw</h3><input type="number" id="fAmt" data-testid="funds-amount" placeholder="Amount" min="1" style="padding:8px;width:100%;margin-bottom:8px"><div class="err" id="fErr" data-testid="funds-error"></div>
+ <button class="btn p" id="fAdd" data-testid="funds-add">Add funds</button> <button class="btn" id="fWd" data-testid="funds-withdraw">Withdraw</button></div></div>`}};
+
+function render(){$$("nav [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v==view));$("#main").innerHTML=V[view]();wl();bind()}
+function bind(){const m=$("#main");
+ $$("#main [data-b]").forEach(b=>b.onclick=()=>openOrder(b.dataset.b,"BUY"));$$("#main [data-sl]").forEach(b=>b.onclick=()=>openOrder(b.dataset.sl,"SELL"));
+ $$("[data-can]").forEach(b=>b.onclick=()=>{const o=D.orders.find(x=>x.id==b.dataset.can);o.st="CANCELLED";save();render();toast("Order cancelled")});
+ $$("[data-exec]").forEach(b=>b.onclick=()=>{const o=D.orders.find(x=>x.id==b.dataset.exec);run(o,o.px);save();render()});
+ $$("[data-mod]").forEach(b=>b.onclick=()=>openOrder(null,null,b.dataset.mod));
+ $$("[data-pt]").forEach(b=>b.onclick=()=>{ptab=b.dataset.pt;render()});
+ $$("[data-sq]").forEach(b=>b.onclick=()=>{const p=D.pos.find(x=>x.s==b.dataset.sq);place({s:p.s,side:p.q>0?"SELL":"BUY",prod:"MIS",type:"MARKET",q:Math.abs(p.q),px:0,trig:0,amo:false});render()});
+ if($("#fAdd")){const go=k=>{const a=+$("#fAmt").value;if(!(a>0))return $("#fErr").textContent="Enter a valid amount";if(k<0&&a>avail())return $("#fErr").textContent="Insufficient funds to withdraw";D.cash+=k*a;save();render();toast("Funds updated")};$("#fAdd").onclick=()=>go(1);$("#fWd").onclick=()=>go(-1)}}
+
+/* orders */
+function run(o,price){const x=o.s;o.st="COMPLETE";o.px=o.type=="MARKET"||o.type=="SL-M"?price:o.px;o.ex=price;
+ if(o.prod=="CNC"){let h=D.hold.find(y=>y.s==x);if(o.side=="BUY"){D.cash-=o.q*price;if(h){h.a=(h.a*h.q+price*o.q)/(h.q+o.q);h.q+=o.q}else D.hold.push({s:x,q:o.q,a:price})}
+  else{h.q-=o.q;D.cash+=o.q*price;if(!h.q)D.hold=D.hold.filter(y=>y!=h)}}
+ else{let p=D.pos.find(y=>y.s==x);if(!p){p={s:x,q:0,a:price,r:0};D.pos.push(p)}const d=o.side=="BUY"?1:-1;
+  if(!p.q||Math.sign(p.q)==d){p.a=(Math.abs(p.q)*p.a+o.q*price)/(Math.abs(p.q)+o.q);p.q+=d*o.q}
+  else{const c=Math.min(o.q,Math.abs(p.q)),pl=(price-p.a)*c*Math.sign(p.q);p.r+=pl;D.cash+=pl;p.q+=d*o.q;if(p.q&&Math.sign(p.q)==d)p.a=price}}}
+function place(o,editId){const x=S[o.s],now=new Date().toLocaleTimeString("en-GB");const ltp=x.p;
+ o.id=editId||String(++D.n);o.t=now;o.st="OPEN";
+ if(o.prod=="CNC"&&o.side=="SELL"){const h=D.hold.find(y=>y.s==o.s);if(!h||h.q<o.q)o.st="REJECTED",o.why="Insufficient holdings"}
+ if(o.st=="OPEN"&&o.side=="BUY"||o.prod=="MIS"){const p=D.pos.find(y=>y.s==o.s),closing=o.prod=="MIS"&&p&&p.q&&Math.sign(p.q)!=(o.side=="BUY"?1:-1);
+  const need=(o.prod=="CNC"?1:.2)*o.q*(o.px||ltp);if(o.st=="OPEN"&&!closing&&need>avail())o.st="REJECTED",o.why="Insufficient funds"}
+ if(o.st=="OPEN"){o.px=o.px||ltp;if(o.amo)o.st="AMO REQ RECEIVED";
+  else if(o.type=="MARKET")run(o,ltp);
+  else if(o.type=="LIMIT"&&(o.side=="BUY"?o.px>=ltp:o.px<=ltp))run(o,ltp);
+  else if(o.type=="SL-M"&&(o.side=="BUY"?ltp>=o.trig:ltp<=o.trig))run(o,ltp)}
+ if(editId)D.orders[D.orders.findIndex(y=>y.id==editId)]=o;else D.orders.push(o);
+ save();toast(`Order ${o.id}: ${o.st}${o.why?" - "+o.why:""}`);return o}
+
+/* modal */
+function spark(s){const x=S[s];let a=s.split("").reduce((t,c)=>t+c.charCodeAt(0),7)*131,r=()=>(a=(a*16807)%2147483647)/2147483647,v=100,p=[];for(let i=0;i<24;i++){v+=(r()-.5)*3+(x.c>=0?.25:-.25);p.push(v)}const mn=Math.min(...p),mx=Math.max(...p);return `<svg viewBox="0 0 110 36" aria-hidden="true"><polyline fill="none" stroke="#fff" stroke-width="2" points="${p.map((y,i)=>`${(i*110/23).toFixed(1)},${(34-(y-mn)/(mx-mn||1)*32).toFixed(1)}`).join(" ")}"/></svg>`}
+let M={};
+const rv=n=>$(`input[name=${n}]:checked`).value;
+function openOrder(sym,side,editId){let e=editId&&D.orders.find(o=>o.id==editId);M={sym:e?e.s:sym,edit:editId};const x=S[M.sym];
+ $("#mSym").textContent=M.sym;$("#mLtp").textContent="LTP "+f(x.p);$("#mChg").textContent=x.sec+" · "+(x.c>0?"+":"")+x.c.toFixed(2)+"% today";$("#mSpark").innerHTML=spark(M.sym);
+ $(`input[name=side][value=${e?e.side:side}]`).checked=true;$(`input[name=prod][value=${e?e.prod:"CNC"}]`).checked=true;
+ $("#oQty").value=e?e.q:1;$("#oType").value=e?e.type:"MARKET";$("#oPrice").value=e&&e.type!="MARKET"?e.px:"";$("#oTrig").value=e&&e.trig||"";$("#oAmo").checked=!!(e&&e.amo);$("#oErr").textContent="";
+ sync();$("#ov").classList.add("show");setTimeout(()=>$("#oQty").focus(),30)}
+function sync(){const t=$("#oType").value,s=rv("side");$("#oPrice").disabled=t=="MARKET"||t=="SL-M";$("#oTrig").disabled=t=="MARKET"||t=="LIMIT";
+ $("#mh").className=s;$("#modal").className=s;$("#oSubmit").className="btn "+(s=="BUY"?"p":"s");$("#oSubmit").textContent=(M.edit?"Modify ":"")+(s=="BUY"?"Buy":"Sell");
+ const px=+$("#oPrice").value||S[M.sym].p,qn=+$("#oQty").value||0;const need=qn*px*(rv("prod")=="CNC"?1:1/lev(M.sym)),use=s=="BUY"||rv("prod")=="MIS"?need:0;$("#oMargin").textContent=f(need);$("#oAvail").textContent=f(avail());$("#oAfter").textContent=f(avail()-use);$("#oAfter").className=avail()-use<0?"dn":""}
+["input","change"].forEach(ev=>$("#modal").addEventListener(ev,sync));
+$("#mClose").onclick=()=>$("#ov").classList.remove("show");
+$("#ov").onclick=e=>{if(e.target.id=="ov")$("#ov").classList.remove("show")};
+document.addEventListener("keydown",e=>{if(e.key=="Escape")$("#ov").classList.remove("show")});
+$("#oSubmit").onclick=()=>{const t=$("#oType").value,qn=+$("#oQty").value,px=+$("#oPrice").value,tr=+$("#oTrig").value,E=m=>$("#oErr").textContent=m;
+ if(!Number.isInteger(qn)||qn<1)return E("Quantity must be a whole number of at least 1");
+ if((t=="LIMIT"||t=="SL")&&!(px>0))return E("Enter a valid price");
+ if((t=="SL"||t=="SL-M")&&!(tr>0))return E("Enter a valid trigger price");
+ if(t=="SL"&&rv("side")=="BUY"&&px<tr)return E("For SL buy, price must be at or above trigger");
+ const o=place({s:M.sym,side:rv("side"),prod:rv("prod"),type:t,q:qn,px:t=="MARKET"||t=="SL-M"?0:px,trig:tr,amo:$("#oAmo").checked,val:$("#oVal").value},M.edit);
+ $("#ov").classList.remove("show");view=o.st=="COMPLETE"||o.st=="REJECTED"||M.edit?"orders":view;if(view=="orders")location.hash="orders";render()};
+
+/* ===== market session, order lifecycle, exit popup, price simulator ===== */
+const nowT=()=>new Date().toLocaleTimeString('en-GB'),hm=t=>new Date(t).toLocaleTimeString('en-GB');
+const mmss=ms=>{ms=Math.max(0,Math.ceil(ms/1000));const p=n=>String(n).padStart(2,'0');return p(Math.floor(ms/3600))+':'+p(Math.floor(ms%3600/60))+':'+p(ms%60)};
+const sv=(e,v)=>{if(document.activeElement!==e)e.value=v};
+let lastStep=0,otab='all',X={};
+function applyPx(){ALL.forEach(x=>{x.p=D.px[x.s]!==undefined?D.px[x.s]:x.p0;x.c=(x.p-x.pc)/x.pc*100})}
+function setLtp(s,p){const x=S[s];x.p=+(+p).toFixed(2);x.c=(x.p-x.pc)/x.pc*100;D.px[s]=x.p}
+const tkh=x=>`${x.s} <b style='color:${x.c>=0?'#4ade80':'#f87171'}'>${f(x.p)} ${x.c>=0?'▲':'▼'} ${Math.abs(x.c).toFixed(2)}%</b>`;
+function tk(){ALL.forEach(x=>$$(`[data-testid='ticker-${x.s}']`).forEach(e=>e.innerHTML=tkh(x)))}
+function step(){const k=++D.mkt.tick;ALL.forEach(x=>{const h=Math.sin((k*131+x.s.length*977+x.s.charCodeAt(0)*31+x.s.charCodeAt(x.s.length-1))*12.9898)*43758.5453,r=h-Math.floor(h);setLtp(x.s,x.p*(1+(r-.5)*.03))});const ch=evalAll();save();tk();(view=='funds'||view=='basket'||(view=='orders'&&!ch))?wl():render()}
+const log=(o,m)=>{(o.h=o.h||[]).push({t:nowT(),st:o.st,m})},oid=i=>D.orders.find(o=>o.id==i);
+const resv=(s,prod,side,ex)=>D.orders.filter(o=>o.id!=ex&&o.s==s&&o.prod==prod&&o.side==side&&(o.st=='OPEN'||o.st=='TRIGGER PENDING'||o.st=='AMO REQ RECEIVED')).reduce((t,o)=>t+o.q-(o.fq||0),0);
+const upl=p=>p.q?(S[p.s].p-p.a)*p.q:0;
+function can(o,l){const b=o.side=='BUY';if(o.type=='MARKET')return true;if(o.type=='LIMIT')return b?l<=o.px:l>=o.px;
+ if(!o.trd&&(b?l>=o.trig:l<=o.trig)){o.trd=true;log(o,'Trigger price hit at LTP '+f(l))}
+ if(!o.trd)return false;return o.type=='SL-M'||(b?l<=o.px:l>=o.px)}
+function short(o,px){if(o.prod=='CNC'&&o.side=='SELL')return false;const pp=D.pos.find(y=>y.s==o.s),d=o.side=='BUY'?1:-1;if(o.prod=='MIS'&&pp&&pp.q&&Math.sign(pp.q)!=d)return false;return o.q*px*(o.prod=='CNC'?1:.2)>avail()}
+function run(o,price){const x=o.s,d=o.side=='BUY'?1:-1;o.st='COMPLETE';o.ex=price;o.xt=nowT();o.pl=0;
+ if(o.prod=='CNC'){const h=D.hold.find(y=>y.s==x);
+  if(d>0){D.cash-=o.q*price;if(h){h.a=(h.a*h.q+price*o.q)/(h.q+o.q);h.q+=o.q}else D.hold.push({s:x,q:o.q,a:price})}
+  else{o.pl=(price-h.a)*o.q;D.cash+=o.q*price;D.hh.push({s:x,q:o.q,bp:h.a,sp:price,pl:o.pl,t:o.xt,id:o.id});h.q-=o.q;if(!h.q)D.hold=D.hold.filter(y=>y!=h)}}
+ else{let p=D.pos.find(y=>y.s==x);if(!p){p={s:x,q:0,a:price,r:0,bq:0,sq:0,ba:0,sa:0};D.pos.push(p)}
+  if(!p.q){p.bq=p.sq=p.ba=p.sa=0}
+  if(d>0){p.ba=(p.ba*p.bq+price*o.q)/(p.bq+o.q);p.bq+=o.q}else{p.sa=(p.sa*p.sq+price*o.q)/(p.sq+o.q);p.sq+=o.q}
+  if(!p.q||Math.sign(p.q)==d){p.a=(Math.abs(p.q)*p.a+o.q*price)/(Math.abs(p.q)+o.q);p.q+=d*o.q}
+  else{const c=Math.min(o.q,Math.abs(p.q));o.pl=(price-p.a)*c*Math.sign(p.q);p.r+=o.pl;D.cash+=o.pl;p.q+=d*o.q;if(p.q&&Math.sign(p.q)==d)p.a=price}}
+ log(o,'Executed '+o.q+' @ '+f(price)+(o.pl?' | realized P&L '+sg(o.pl):''))}
+function fill(o,px){if(short(o,px)){o.st='REJECTED';o.why='Insufficient funds at execution';log(o,'Rejected: insufficient funds');return}run(o,px)}
+function evalAll(){let ch=false;if(D.mkt.st!='OPEN')return ch;D.orders.filter(o=>o.st=='OPEN').forEach(o=>{if(can(o,S[o.s].p)){fill(o,S[o.s].p);ch=true}});save();return ch}
+function place(o,editId){const ltp=S[o.s].p,old=editId&&oid(editId),closed=D.mkt.st!='OPEN';
+ o.id=editId||String(++D.n);o.t=old?old.t:nowT();o.h=old?old.h:[];o.ss=old?old.ss:D.mkt.sess;o.st='OPEN';if(old&&old.cv)o.cv=1;
+ log(o,old?'Modified: qty '+o.q+', price '+(o.px||'MKT')+', trigger '+(o.trig||'-'):'Order placed (session '+o.ss+')');
+ const rej=m=>{o.st='REJECTED';o.why=m;log(o,'Rejected: '+m)};
+ if(closed&&!o.amo)rej('Market closed - place as AMO');
+ else if(o.side=='SELL'&&o.prod=='CNC'){const h=D.hold.find(y=>y.s==o.s);if(!h||h.q-resv(o.s,'CNC','SELL',editId)<o.q)rej('Insufficient holdings')}
+ else if(o.xit&&o.q>Math.abs((D.pos.find(y=>y.s==o.s)||{q:0}).q)-resv(o.s,'MIS',o.side,editId))rej('Exit quantity exceeds available position');
+ if(o.st=='OPEN'&&short(o,o.px||ltp))rej('Insufficient funds');
+ if(o.st=='OPEN'){if(o.amo){o.st='AMO REQ RECEIVED';log(o,'AMO accepted - queued for next market session')}
+  else if(can(o,ltp))fill(o,ltp);
+  else if(o.val=='IOC'){o.st='CANCELLED';o.why='IOC not executed immediately';log(o,'Cancelled: IOC')}
+  else log(o,'Order pending at exchange')}
+ if(old)D.orders[D.orders.findIndex(y=>y.id==editId)]=o;else D.orders.push(o);
+ save();toast('Order '+o.id+': '+o.st+(o.why?' - '+o.why:''));return o}
+function closeMkt(){const m=D.mkt;m.st='CLOSED';let n=0;D.orders.forEach(o=>{if(o.st=='OPEN'||o.st=='TRIGGER PENDING'){o.amo=true;o.cv=1;o.st='AMO REQ RECEIVED';n++;log(o,'Market closed: pending order converted to AMO')}});save();render();mbar();toast('Market CLOSED'+(n?' - '+n+' pending order(s) converted to AMO':''))}
+function startSession(){const m=D.mkt;m.sess++;m.start=Date.now();m.st='OPEN';D.orders.forEach(o=>{if(o.st=='AMO REQ RECEIVED'){o.st='OPEN';log(o,'Session '+m.sess+' opened: AMO submitted for execution')}});evalAll();save();render();mbar();toast('Market OPEN - session '+m.sess)}
+function mbar(){const m=D.mkt,end=m.start+m.dur*60000,o=m.st=='OPEN';
+ $('#mkSt').textContent=m.st;$('#mkSt').className=o?'up':'dn';$('#mkSess').textContent=m.sess;$('#mkS').textContent=hm(m.start);$('#mkC').textContent=hm(end);$('#mkR').textContent=o?mmss(end-Date.now()):'00:00:00';
+ sv($('#mkDur'),m.dur);sv($('#simMode'),m.sim);sv($('#simIv'),m.iv);$('#mkNext').disabled=o;$('#mkNow').disabled=!o}
+function T(){const m=D.mkt;if(m.st=='OPEN'&&Date.now()>=m.start+m.dur*60000)closeMkt();
+ if(D.mkt.st=='OPEN'&&m.sim=='auto'&&Date.now()-lastStep>=m.iv*1000){lastStep=Date.now();step()}mbar()}
+$('#mkDur').onchange=e=>{D.mkt.dur=+e.target.value;save();T()};
+$('#mkNow').onclick=()=>{if(D.mkt.st=='OPEN')closeMkt()};$('#mkNext').onclick=()=>{if(D.mkt.st!='OPEN')startSession()};
+$('#mkFf').onclick=()=>{D.mkt.start-=300000;save();T()};
+$('#simMode').onchange=e=>{D.mkt.sim=e.target.value;save()};$('#simIv').onchange=e=>{D.mkt.iv=+e.target.value;save()};
+$('#simStep').onclick=()=>{D.mkt.st=='OPEN'?step():toast('Market is closed')};
+$('#ltpSym').innerHTML=ALL.map(x=>`<option>${x.s}</option>`).join('');
+$('#ltpSet').onclick=()=>{const v=+$('#ltpVal').value;if(!(v>0))return toast('Enter a valid price');setLtp($('#ltpSym').value,v);evalAll();save();tk();render();toast('LTP updated')};
+
+/* orders view with lifecycle tabs and history */
+const OT={all:o=>1,open:o=>o.st=='OPEN',executed:o=>o.st=='COMPLETE',rejected:o=>o.st=='REJECTED',cancelled:o=>o.st=='CANCELLED',amo:o=>o.st=='AMO REQ RECEIVED'},LB={all:'All Orders',open:'Open',executed:'Executed',rejected:'Rejected',cancelled:'Cancelled',amo:'AMO'};
+const rowO=x=>{const op=x.st=='OPEN'||x.st=='AMO REQ RECEIVED';return `<tr data-testid='order-row-${x.id}'><td>${x.t}</td><td class='${x.side=='BUY'?'up':'dn'}' data-testid='order-side-${x.id}'>${x.side}</td><td data-testid='order-sym-${x.id}'>${x.s}${x.auto?" <span class='tag'>AUTO SQ-OFF</span>":x.xit?" <span class='tag'>EXIT</span>":''}</td><td data-testid='order-type-${x.id}'>${x.prod} / ${x.type}${x.amo?" <span class='tag'>AMO</span>":''}</td><td>${x.val||'DAY'}</td><td data-testid='order-qty-${x.id}'>${x.q}</td><td data-testid='order-price-${x.id}'>${x.px?f(x.px):'MKT'}</td><td data-testid='order-trig-${x.id}'>${x.trig?f(x.trig):'-'}</td><td data-testid='order-exec-${x.id}'>${x.ex?f(x.ex):'-'}</td>
+<td class='st-${x.st=='AMO REQ RECEIVED'?'OPEN':x.st}' data-testid='order-status-${x.id}'>${x.st}${x.why?` <span class='mu'>(${x.why})</span>`:''}<details data-testid='order-history-${x.id}'><summary class='mu'>History</summary>${(x.h||[]).map(h=>`<div class='mu'>${h.t} · ${h.st} · ${h.m}</div>`).join('')}</details></td>
+<td>${op?`<button class='btn' data-mod='${x.id}' data-testid='modify-${x.id}'>Modify</button> ${x.st=='OPEN'?`<button class='btn' data-exec='${x.id}' data-testid='execute-${x.id}' ${D.mkt.st!='OPEN'?'disabled':''}>Execute</button> `:''}<button class='btn' data-can='${x.id}' data-testid='cancel-${x.id}'>Cancel</button>`:''}</td></tr>`};
+V.orders=()=>{const all=[...D.orders].reverse(),l=all.filter(OT[otab]);
+ return `<h2>Orders (${all.length})</h2><div class='pills' data-testid='orders-tabs'>${Object.keys(OT).map(k=>`<button class='pill ${k==otab?'on':''}' data-ot='${k}' data-testid='orders-tab-${k}'>${LB[k]} (${D.orders.filter(OT[k]).length})</button>`).join('')}</div>
+ <div class='card scroll'><table data-testid='orders-table'><tr><th>Time</th><th>Side</th><th>Instrument</th><th>Product / type</th><th>Validity</th><th>Qty</th><th>Price</th><th>Trigger</th><th>Exec price</th><th>Status</th><th></th></tr>${l.length?l.map(rowO).join(''):"<tr><td colspan='11' class='mu' data-testid='orders-empty'>No orders</td></tr>"}</table></div>`};
+
+/* positions view */
+V.positions=()=>{const l=D.pos.filter(p=>ptab=='open'?p.q:!p.q),un=D.pos.reduce((t,p)=>t+upl(p),0),rl=D.pos.reduce((t,p)=>t+p.r,0);
+ return `<h2>Positions</h2><div class='grid'><div class='card'><div class='mu'>Unrealized P&amp;L</div><b class='${cl(un)}' data-testid='pos-unrealized'>${sg(un)}</b></div><div class='card'><div class='mu'>Realized P&amp;L</div><b class='${cl(rl)}' data-testid='pos-realized'>${sg(rl)}</b></div></div>
+ <div class='pills'><button class='pill ${ptab=='open'?'on':''}' data-pt='open' data-testid='pos-tab-open'>Open (${D.pos.filter(p=>p.q).length})</button><button class='pill ${ptab=='closed'?'on':''}' data-pt='closed' data-testid='pos-tab-closed'>Closed (${D.pos.filter(p=>!p.q).length})</button></div>
+ <div class='card scroll'><table data-testid='positions-table'><tr><th>Instrument</th><th>Product</th><th>Qty</th><th>Buy avg</th><th>Sell avg</th><th>Avg</th><th>LTP</th><th>Unrealized</th><th>Realized</th><th>Total P&amp;L</th><th></th></tr>
+ ${l.length?l.map(p=>`<tr data-testid='position-row-${p.s}'><td>${p.s}</td><td>MIS</td><td data-testid='position-qty-${p.s}'>${p.q}</td><td data-testid='position-buy-${p.s}'>${p.bq?f(p.ba):'-'}</td><td data-testid='position-sell-${p.s}'>${p.sq?f(p.sa):'-'}</td><td data-testid='position-avg-${p.s}'>${f(p.a)}</td><td data-testid='position-ltp-${p.s}'>${f(S[p.s].p)}</td><td class='${cl(upl(p))}' data-testid='position-upnl-${p.s}'>${sg(upl(p))}</td><td class='${cl(p.r)}' data-testid='position-rpnl-${p.s}'>${sg(p.r)}</td><td class='${cl(posPnl(p))}' data-testid='position-pnl-${p.s}'>${sg(posPnl(p))}</td><td>${p.q?`<button class='btn' data-xit='${p.s}' data-testid='exit-${p.s}'>Exit</button>`:''}</td></tr>`).join(''):`<tr><td colspan='11' class='mu' data-testid='positions-empty'>No ${ptab} positions</td></tr>`}</table></div>`};
+
+/* holdings: add sold history */
+const _h=V.holdings;V.holdings=()=>_h()+`<h3 style='margin-top:20px'>Sold holdings history</h3><div class='card scroll'><table data-testid='holdings-history'><tr><th>Instrument</th><th>Qty sold</th><th>Avg buy</th><th>Sell price</th><th>Realized P&amp;L</th><th>Time</th></tr>${D.hh.length?D.hh.slice().reverse().map(h=>`<tr data-testid='hist-row-${h.id}'><td>${h.s}</td><td>${h.q}</td><td>${f(h.bp)}</td><td>${f(h.sp)}</td><td class='${cl(h.pl)}' data-testid='hist-pnl-${h.id}'>${sg(h.pl)}</td><td>${h.t}</td></tr>`).join(''):"<tr><td colspan='6' class='mu' data-testid='holdings-history-empty'>No sold holdings yet</td></tr>"}</table></div>`;
+
+/* bindings */
+function bind(){
+ $$('#main [data-b]').forEach(b=>b.onclick=()=>openOrder(b.dataset.b,'BUY'));$$('#main [data-sl]').forEach(b=>b.onclick=()=>openOrder(b.dataset.sl,'SELL'));
+ $$('[data-can]').forEach(b=>b.onclick=()=>{const o=oid(b.dataset.can);o.st='CANCELLED';log(o,'Cancelled by user');save();render();toast('Order '+o.id+' cancelled')});
+ $$('[data-exec]').forEach(b=>b.onclick=()=>{const o=oid(b.dataset.exec);fill(o,S[o.s].p);save();render();toast('Order '+o.id+': '+o.st)});
+ $$('[data-mod]').forEach(b=>b.onclick=()=>{const o=oid(b.dataset.mod);o.xit?openExit(o.s,o.id):openOrder(null,null,o.id)});
+ 
+ $$('[data-xit]').forEach(b=>b.onclick=()=>openExit(b.dataset.xit));
+ if($('#fAdd')){const go=k=>{const a=+$('#fAmt').value;if(!(a>0))return $('#fErr').textContent='Enter a valid amount';if(k<0&&a>avail())return $('#fErr').textContent='Insufficient funds to withdraw';D.cash+=k*a;save();render();toast('Funds updated')};$('#fAdd').onclick=()=>go(1);$('#fWd').onclick=()=>go(-1)}}
+
+/* regular order popup: AMO rule when market closed */
+const _oo=openOrder;openOrder=(s,sd,id)=>{_oo(s,sd,id);const z=D.mkt.st!='OPEN';if(z)$('#oAmo').checked=true;$('#oAmo').disabled=z;$('#oNote').textContent=z?'Market is closed: only AMO orders are allowed':''};
+
+/* exit popup */
+function openExit(s,editId){const p=D.pos.find(y=>y.s==s),e=editId&&oid(editId);
+ if(D.mkt.st!='OPEN')return toast('Market is closed - exit orders are not allowed');if(!p||!p.q)return;
+ X={s,id:editId};const av=Math.abs(p.q)-resv(s,'MIS',p.q>0?'SELL':'BUY',editId);
+ $('#xSym').textContent=s;$('#xAvail').textContent=av;$('#xQty').value=e?e.q:av;$(`input[name=xt][value=${e&&e.type=='LIMIT'?'LIMIT':'MARKET'}]`).checked=true;$('#xPx').value=e&&e.px||'';$('#xErr').textContent='';xs();$('#xov').classList.add('show')}
+function xs(){const p=D.pos.find(y=>y.s==X.s),l=S[X.s].p,t=$('input[name=xt]:checked').value,q=+$('#xQty').value||0,px=t=='LIMIT'?+$('#xPx').value:l;
+ $('#xLtp').textContent=f(l);$('#xAvg').textContent=f(p.a);$('#xPx').disabled=t=='MARKET';$('#xTypeTxt').textContent=t;$('#xLimTxt').textContent=t=='LIMIT'&&px?f(px):'-';
+ const pl=(px-p.a)*q*Math.sign(p.q);$('#xPl').textContent=px?sg(pl):'-';$('#xPl').className=cl(pl)}
+['input','change'].forEach(ev=>$('#xm').addEventListener(ev,xs));
+$('#xClose').onclick=()=>$('#xov').classList.remove('show');$('#xov').onclick=e=>{if(e.target.id=='xov')$('#xov').classList.remove('show')};
+$('#xSubmit').onclick=()=>{const p=D.pos.find(y=>y.s==X.s),t=$('input[name=xt]:checked').value,q=+$('#xQty').value,px=+$('#xPx').value,av=+$('#xAvail').textContent,E=m=>$('#xErr').textContent=m;
+ if(!Number.isInteger(q)||q<1)return E('Quantity must be a whole number of at least 1');
+ if(q>av)return E('Exit quantity cannot exceed available quantity ('+av+')');
+ if(t=='LIMIT'&&!(px>0))return E('Enter a valid limit price');
+ if(D.mkt.st!='OPEN')return E('Market is closed');
+ place({s:X.s,side:p.q>0?'SELL':'BUY',prod:'MIS',type:t,q,px:t=='LIMIT'?px:0,trig:0,amo:false,val:'DAY',xit:true},X.id);
+ $('#xov').classList.remove('show');view='orders';otab='all';location.hash='orders';render()};
+
+/* ===== IPO section ===== */
+function ipoBlk(){return (D.ipoA||[]).filter(a=>a.st==='APPLIED').reduce((t,a)=>t+a.amt,0)}
+const MINV=15000,RMAX=200000,rs=n=>'₹'+Number(n).toLocaleString('en-IN');
+const IPO=[
+{id:'JIO',n:'Jio Platforms Ltd',sec:'Telecom & Digital',st:'OPEN',o:'30 Oct 2026',c:'03 Nov 2026',al:'06 Nov 2026',li:'10 Nov 2026',lo:1050,hi:1100,lot:14,size:'₹40,000 Cr',val:'₹9.2 L Cr',type:'Fresh + OFS',sub:[3.42,6.8,1.25,3.1],about:'Telecom, broadband and digital services platform.'},
+{id:'HEROFIN',n:'Hero FinCorp Ltd',sec:'NBFC / Financial services',st:'OPEN',o:'29 Oct 2026',c:'02 Nov 2026',al:'05 Nov 2026',li:'09 Nov 2026',lo:560,hi:590,lot:26,size:'₹3,668 Cr',val:'₹14,500 Cr',type:'Fresh + OFS',sub:[1.84,2.65,0.92,1.57],about:'Two-wheeler, personal and business loan lender.'},
+{id:'PHONEPE',n:'PhonePe Ltd',sec:'Fintech / Payments',st:'UPCOMING',o:'09 Nov 2026',c:'11 Nov 2026',al:'14 Nov 2026',li:'18 Nov 2026',lo:640,hi:680,lot:23,size:'₹12,000 Cr',val:'₹1.1 L Cr',type:'OFS',sub:[0,0,0,0],about:'Digital payments and financial services app.'},
+{id:'ZEPTO',n:'Zepto Ltd',sec:'Quick commerce',st:'UPCOMING',o:'16 Nov 2026',c:'18 Nov 2026',al:'21 Nov 2026',li:'25 Nov 2026',lo:385,hi:405,lot:38,size:'₹11,000 Cr',val:'₹70,000 Cr',type:'Fresh issue',sub:[0,0,0,0],about:'10-minute grocery and essentials delivery.'},
+{id:'SBIFM',n:'SBI Funds Management Ltd',sec:'Asset management',st:'CLOSED',o:'21 Oct 2026',c:'23 Oct 2026',al:'28 Oct 2026',li:'30 Oct 2026 (Listed)',lo:810,hi:850,lot:18,size:'₹10,800 Cr',val:'₹42,000 Cr',type:'OFS',sub:[8.9,22.4,31.5,21.7],about:'Mutual fund asset management company.'},
+{id:'BOAT',n:'boAt Lifestyle Ltd',sec:'Consumer electronics',st:'CLOSED',o:'26 Oct 2026',c:'29 Oct 2026',al:'03 Nov 2026',li:'05 Nov 2026',lo:320,hi:340,lot:45,size:'₹1,500 Cr',val:'₹6,800 Cr',type:'Fresh + OFS',sub:[4.1,5.6,7.2,5.7],about:'Audio and wearables consumer brand.'}];
+let itab='open',IA={};
+const IL={open:'Open',upcoming:'Upcoming',closed:'Closed / Listed',apps:'My applications'},SUBL=['Retail','NII','QIB','Total'];
+const ipoCard=i=>{const id=i.id,st=i.st;return `<div class='card ipo' data-testid='ipo-card-${id}'>
+ <div class='row'><b data-testid='ipo-name-${id}'>${i.n}</b><span class='tag' data-testid='ipo-status-${id}'>${st}</span></div><div class='mu'>${i.sec} · ${i.type}</div>
+ <div class='row'><span class='mu'>Valuation</span><b data-testid='ipo-valuation-${id}'>${i.val}</b></div><div class='row'><span class='mu'>Issue size</span><b data-testid='ipo-size-${id}'>${i.size}</b></div>
+ <div class='row'><span class='mu'>Open - Close</span><b data-testid='ipo-dates-${id}'>${i.o} - ${i.c}</b></div><div class='row'><span class='mu'>Price band</span><b data-testid='ipo-band-${id}'>${rs(i.lo)} - ${rs(i.hi)}</b></div>
+ <div class='row'><span class='mu'>Lot / Min investment</span><b data-testid='ipo-min-${id}'>${i.lot} shares / ${rs(i.lot*i.hi)}</b></div>
+ ${st=='UPCOMING'?`<div class='mu' data-testid='ipo-sub-na-${id}'>Subscription starts on ${i.o}</div>`:SUBL.map((l,k)=>`<div data-testid='ipo-sub-${l.toLowerCase()}-${id}'><div class='row'><span>${l} subscription</span><b>${i.sub[k].toFixed(2)}x</b></div><div class='bar'><i style='width:${Math.min(100,i.sub[k]*20)}%'></i></div></div>`).join('')}
+ <details data-testid='ipo-details-${id}'><summary>More details</summary><div class='mu'>${i.about}<br>Allotment: ${i.al} · Listing: ${i.li}<br>Exchanges: NSE, BSE · Quota: Retail 35%, NII 15%, QIB 50%</div></details>
+ ${st=='OPEN'?`<button class='btn p' data-ipo='${id}' data-testid='ipo-apply-${id}'>Apply</button>`:`<button class='btn' disabled data-testid='ipo-apply-${id}'>${st=='UPCOMING'?'Opens '+i.o:'Closed'}</button>`}</div>`};
+const appRow=a=>{const i=IPO.find(y=>y.id==a.ipo),can2=a.st=='APPLIED'&&i.st=='OPEN';return `<tr data-testid='ipo-app-row-${a.id}'><td>${a.id}</td><td>${a.name}</td><td data-testid='ipo-app-cat-${a.id}'>${a.cat}</td><td>${a.lots}</td><td data-testid='ipo-app-qty-${a.id}'>${a.qty}</td><td>${a.cut?'Cut-off ':''}${f(a.price)}</td><td data-testid='ipo-app-amount-${a.id}'>${f(a.amt)}</td><td>${a.upi}</td><td class='${a.st=='APPLIED'?'up':'dn'}' data-testid='ipo-app-status-${a.id}'>${a.st}<details><summary class='mu'>History</summary>${a.h.map(h=>`<div class='mu'>${h.t} · ${h.m}</div>`).join('')}</details></td><td>${can2?`<button class='btn' data-am='${a.id}' data-testid='ipo-app-modify-${a.id}'>Modify</button> <button class='btn' data-ac='${a.id}' data-testid='ipo-app-cancel-${a.id}'>Cancel</button>`:''}</td></tr>`};
+V.ipo=()=>{const A=D.ipoA=D.ipoA||[],cnt=k=>k=='apps'?A.length:IPO.filter(i=>i.st.toLowerCase()==k).length;
+ return `<h2>IPO</h2><div class='mu' data-testid='ipo-rules'>Demo data for practice. Minimum bid ${rs(MINV)} · Retail up to ${rs(RMAX)} · Funds blocked: <b data-testid='ipo-blocked'>${f(ipoBlk())}</b></div>
+ <div class='pills' data-testid='ipo-tabs'>${Object.keys(IL).map(k=>`<button class='pill ${k==itab?'on':''}' data-it='${k}' data-testid='ipo-tab-${k}'>${IL[k]} (${cnt(k)})</button>`).join('')}</div>
+ ${itab=='apps'?`<div class='card scroll'><table data-testid='ipo-apps-table'><tr><th>App ID</th><th>Company</th><th>Category</th><th>Lots</th><th>Qty</th><th>Bid price</th><th>Amount blocked</th><th>UPI</th><th>Status</th><th></th></tr>${A.length?A.slice().reverse().map(appRow).join(''):"<tr><td colspan='10' class='mu' data-testid='ipo-apps-empty'>No IPO applications yet</td></tr>"}</table></div>`:`<div class='grid'>${IPO.filter(i=>i.st.toLowerCase()==itab).map(ipoCard).join('')}</div>`}`};
+const _fu=V.funds;V.funds=()=>_fu().replace(`<b data-testid="funds-cash">${f(D.cash)}</b></div>`,`<b data-testid="funds-cash">${f(D.cash)}</b></div><div class='row'><span>Blocked for IPO</span><b data-testid='funds-ipo-blocked'>${f(ipoBlk())}</b></div>`);
+function openIpo(id,appId){const i=IPO.find(y=>y.id==id),a=appId&&D.ipoA.find(y=>y.id==appId);IA={id,app:appId};
+ $('#ipN').textContent=i.n;$('#ipBand').textContent=rs(i.lo)+' - '+rs(i.hi);$('#ipLot').textContent=i.lot+' shares ('+rs(i.lot*i.hi)+' at upper band)';
+ $('#ipCat').value=a?a.cat:'RETAIL';$('#ipCat').disabled=!!a;$('#ipLots').value=a?a.lots:1;$('#ipCut').checked=a?a.cut:true;$('#ipPx').value=a&&!a.cut?a.price:'';$('#ipUpi').value=a?a.upi:'';$('#ipErr').textContent='';ips();$('#ipov').classList.add('show')}
+function ips(){const i=IPO.find(y=>y.id==IA.id),lots=+$('#ipLots').value||0,cut=$('#ipCut').checked;$('#ipPx').disabled=cut;const px=cut?i.hi:(+$('#ipPx').value||0);
+ $('#ipQty').textContent=lots*i.lot;$('#ipAmt').textContent=f(lots*i.lot*px);$('#ipSubmit').textContent=IA.app?'Modify application':'Apply'}
+['input','change'].forEach(ev=>$('#ipm').addEventListener(ev,ips));
+$('#ipClose').onclick=()=>$('#ipov').classList.remove('show');$('#ipov').onclick=e=>{if(e.target.id=='ipov')$('#ipov').classList.remove('show')};
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){$('#ipov').classList.remove('show');$('#xov').classList.remove('show')}});
+$('#ipSubmit').onclick=()=>{const i=IPO.find(y=>y.id==IA.id),A=D.ipoA=D.ipoA||[],old=IA.app&&A.find(a=>a.id==IA.app),cat=$('#ipCat').value,lots=+$('#ipLots').value,cut=$('#ipCut').checked,px=cut?i.hi:+$('#ipPx').value,upi=$('#ipUpi').value.trim(),E=m=>$('#ipErr').textContent=m;
+ if(i.st!='OPEN')return E('This IPO is not open for bidding');
+ if(!/^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$/.test(upi))return E('Enter a valid UPI ID (example: name@okbank)');
+ if(!Number.isInteger(lots)||lots<1)return E('Enter at least 1 lot');
+ if(!cut&&!(px>=i.lo&&px<=i.hi))return E('Bid price must be within the price band '+rs(i.lo)+' - '+rs(i.hi));
+ const amt=+(lots*i.lot*px).toFixed(2);
+ if(amt<MINV)return E('Minimum investment is '+rs(MINV)+' (your bid is '+rs(amt)+')');
+ if(cat=='RETAIL'&&amt>RMAX)return E('Retail bids cannot exceed '+rs(RMAX)+'. Choose NII for larger bids');
+ if(cat=='NII'&&amt<=RMAX)return E('NII bids must be above '+rs(RMAX));
+ if(A.some(a=>a.ipo==i.id&&a.cat==cat&&a.st=='APPLIED'&&a!==old))return E('You already have an application in this category. Modify it instead');
+ const av=avail()+(old?old.amt:0);if(amt>av)return E('Insufficient funds: '+rs(Math.round(amt))+' needed, '+rs(Math.round(av))+' available');
+ const rec={id:old?old.id:'A'+(D.ipoN=(D.ipoN||5000)+1),ipo:i.id,name:i.n,cat,lots,qty:lots*i.lot,cut,price:px,amt,upi,st:'APPLIED',t:old?old.t:nowT(),h:old?old.h:[]};
+ rec.h.push({t:nowT(),m:(old?'Modified: ':'Applied: ')+rec.qty+' shares @ '+(cut?'cut-off ':'')+f(px)+', blocked '+f(amt)});
+ if(old)A[A.indexOf(old)]=rec;else A.push(rec);
+ save();$('#ipov').classList.remove('show');itab='apps';idet=null;view='ipo';location.hash='ipo';render();toast('IPO application '+rec.id+(old?' modified':' placed'))};
+function cancelApp(id){const a=D.ipoA.find(y=>y.id==id);a.st='CANCELLED';a.h.push({t:nowT(),m:'Cancelled: blocked funds released'});save();render();toast('IPO application '+id+' cancelled')}
+
+/* one delegated click handler for tabs and IPO buttons (survives every re-render) */
+$('#main').addEventListener('click',e=>{const t=e.target.closest('[data-ot],[data-pt],[data-it],[data-ipo],[data-am],[data-ac],[data-iv],[data-ib]');if(!t)return;const d=t.dataset;
+ if(d.ipo)return openIpo(d.ipo);if(d.am)return openIpo(D.ipoA.find(a=>a.id==d.am).ipo,d.am);if(d.ac)return cancelApp(d.ac);
+ if(d.iv)idet=d.iv;else if(d.ib)idet=null;else if(d.ot)otab=d.ot;else if(d.pt)ptab=d.pt;else if(d.it){itab=d.it;idet=null}render()});
+
+/* ===== MIS auto square-off (before market close) ===== */
+function sqLead(){const m=D.mkt,s=m.sq===undefined?5:m.sq;return s?Math.min(s,m.dur/2)*60000:0}
+function autoSq(){const m=D.mkt;m.sqd=m.sess;let c=0,n=0;
+ D.orders.forEach(o=>{if((o.st=='OPEN'||o.st=='TRIGGER PENDING')&&o.prod=='MIS'){o.st='CANCELLED';o.why='Auto square-off: pending MIS order cancelled';log(o,'Cancelled by auto square-off');c++}});
+ D.pos.filter(p=>p.q).forEach(p=>{const r=place({s:p.s,side:p.q>0?'SELL':'BUY',prod:'MIS',type:'MARKET',q:Math.abs(p.q),px:0,trig:0,amo:false,val:'DAY',xit:true,auto:true});log(r,'Auto square-off at LTP '+f(S[p.s].p));n++});
+ save();render();toast('Auto square-off: '+n+' position(s) closed, '+c+' pending MIS order(s) cancelled')}
+function T(){const m=D.mkt,end=m.start+m.dur*60000,ld=sqLead();
+ if(m.st=='OPEN'&&ld&&Date.now()>=end-ld&&m.sqd!==m.sess)autoSq();
+ if(m.st=='OPEN'&&Date.now()>=end)closeMkt();
+ if(D.mkt.st=='OPEN'&&m.sim=='auto'&&Date.now()-lastStep>=m.iv*1000){lastStep=Date.now();step()}mbar()}
+const _cm=closeMkt;closeMkt=()=>{const m=D.mkt;if(m.sqd!==m.sess&&sqLead())autoSq();_cm()};
+const _ss=startSession;startSession=()=>{D.pos=D.pos.filter(p=>p.q);_ss()};
+const _mb=mbar;mbar=()=>{_mb();const m=D.mkt,ld=sqLead(),end=m.start+m.dur*60000;$('#mkSq').textContent=!ld?'Off':m.sqd===m.sess?'Done':hm(end-ld);sv($('#mkSqSel'),m.sq===undefined?5:m.sq)};
+$('#mkSqSel').onchange=e=>{D.mkt.sq=+e.target.value;save();mbar();render()};
+const _vp=V.positions;V.positions=()=>{const m=D.mkt,ld=sqLead(),end=m.start+m.dur*60000,sq=m.sq===undefined?5:m.sq;
+ return _vp().replace('<h2>Positions</h2>',`<h2>Positions</h2><div class='mu' data-testid='squareoff-note'>MIS (intraday) positions are valid for one trading day only. ${ld?'Open MIS positions are squared off automatically at '+hm(end-ld)+' ('+sq+' min before close, shorter for very short sessions) and pending MIS orders are cancelled.':'Auto square-off is switched off in Test controls.'}</div>`)};
+
+/* ===== IPO: detail page + previous IPOs ===== */
+IL.previous='Previous IPOs';let idet=null;
+IPO.forEach(i=>{i.sub[3]=+(.35*i.sub[0]+.15*i.sub[1]+.5*i.sub[2]).toFixed(2)});
+const PREV=[
+{id:'BSOL',n:'Bharat Solar Ltd',sec:'Renewable energy',d:'12 Aug 2026',ip:245,lp:312,rs:38.4,lot:62,lots:1,res:'ALLOTTED'},
+{id:'NOVA',n:'Nova Pharma Ltd',sec:'Pharma',d:'03 Sep 2026',ip:480,lp:456,rs:2.1,lot:32,lots:1,res:'ALLOTTED'},
+{id:'QKRT',n:'QuickKart Retail Ltd',sec:'Retail & e-commerce',d:'19 Sep 2026',ip:130,lp:187,rs:96.5,lot:116,lots:1,res:'NOT ALLOTTED'},
+{id:'SAGAR',n:'Sagar Logistics Ltd',sec:'Logistics',d:'07 Oct 2026',ip:98,lp:101,rs:12.6,lot:154,lots:1,res:'NOT ALLOTTED'},
+{id:'URBAN',n:'UrbanNest Realty Ltd',sec:'Real estate',d:'15 Oct 2026',ip:720,lp:835,rs:7.8,lot:21,lots:1,res:'ALLOTTED'},
+{id:'ZENITH',n:'Zenith Foods Ltd',sec:'FMCG',d:'24 Oct 2026',ip:210,lp:189,rs:1.3,lot:72,lots:1,res:'ALLOTTED'}];
+const pq=p=>p.lots*p.lot,pg=p=>(p.lp-p.ip)/p.ip*100;
+const pins=p=>{const g=pg(p),a=Math.abs(g).toFixed(1);return p.res=='ALLOTTED'?(g>=0?'Allotted '+pq(p)+' shares. Listed '+a+'% above issue price.':'Allotted '+pq(p)+' shares, but listed '+a+'% below issue price. Low demand ('+p.rs+'x) made allotment easy.'):'Not allotted: retail was '+p.rs+'x subscribed, roughly a 1 in '+Math.ceil(p.rs)+' chance. '+(g>0?'Missed a '+a+'% listing gain.':'Listing was only '+a+'% '+(g<0?'below':'above')+' issue price.')};
+function prevV(){const al=PREV.filter(p=>p.res=='ALLOTTED'),net=al.reduce((t,p)=>t+(p.lp-p.ip)*pq(p),0);
+ return `<div class='grid' data-testid='ipo-prev-summary'><div class='card'><div class='mu'>IPOs applied</div><b data-testid='ipo-prev-applied'>${PREV.length}</b></div><div class='card'><div class='mu'>Allotted</div><b class='up' data-testid='ipo-prev-allotted'>${al.length}</b></div><div class='card'><div class='mu'>Not allotted</div><b class='dn' data-testid='ipo-prev-notallotted'>${PREV.length-al.length}</b></div><div class='card'><div class='mu'>Net listing gain (allotted)</div><b class='${cl(net)}' data-testid='ipo-prev-net'>${sg(net)}</b></div></div>
+ <div class='card scroll'><table data-testid='ipo-prev-table'><tr><th>Company</th><th>Listed on</th><th>Issue price</th><th>Listing price</th><th>Listing gain</th><th>Retail subscription</th><th>Your result</th><th>Qty</th><th>P&amp;L / refund</th><th>Insight</th></tr>
+ ${PREV.map(p=>{const al2=p.res=='ALLOTTED',pl=(p.lp-p.ip)*pq(p);return `<tr data-testid='ipo-prev-row-${p.id}'><td>${p.n}<div class='mu'>${p.sec}</div></td><td>${p.d}</td><td>${f(p.ip)}</td><td>${f(p.lp)}</td><td class='${cl(pg(p))}' data-testid='ipo-prev-gain-${p.id}'>${sg(pg(p))}%</td><td>${p.rs.toFixed(1)}x</td><td class='${al2?'up':'dn'}' data-testid='ipo-prev-result-${p.id}'>${p.res}</td><td>${al2?pq(p):'0 of '+pq(p)}</td><td class='${al2?cl(pl):''}' data-testid='ipo-prev-pl-${p.id}'>${al2?sg(pl):'Refund '+f(pq(p)*p.ip)}</td><td style='text-align:left;min-width:240px' class='mu'>${pins(p)}</td></tr>`}).join('')}</table></div>`}
+function detailV(){const i=IPO.find(y=>y.id==idet),cr=+i.size.replace(/[^0-9]/g,''),sh=cr*1e7/i.hi/1e5,mn=i.lot*i.hi,mx=Math.floor(RMAX/mn),L=n=>n.toFixed(2),up=i.st=='UPCOMING',id=i.id;
+ const Q=[['Retail',35,0],['NII',15,1],['QIB',50,2]];
+ const tbl=up?`<div class='mu' data-testid='ipo-detail-sub-na'>Subscription details appear once bidding opens on ${i.o}.</div>`:`<div class='scroll'><table data-testid='ipo-detail-sub-table'><tr><th>Category</th><th>Quota</th><th>Shares offered (lakh)</th><th>Shares bid (lakh)</th><th>Subscribed</th></tr>${Q.map(([l,qp,k])=>`<tr data-testid='ipo-detail-sub-${l.toLowerCase()}'><td>${l}</td><td>${qp}%</td><td>${L(sh*qp/100)}</td><td>${L(sh*qp/100*i.sub[k])}</td><td><b>${i.sub[k].toFixed(2)}x</b></td></tr>`).join('')}<tr data-testid='ipo-detail-sub-total'><td><b>Total</b></td><td>100%</td><td>${L(sh)}</td><td>${L(sh*i.sub[3])}</td><td><b>${i.sub[3].toFixed(2)}x</b></td></tr></table></div>`;
+ const odds=up?'Not available yet':i.sub[0]<=1?'Very high (retail is not oversubscribed)':'About '+Math.round(100/i.sub[0])+'% per application (allotment by lottery)';
+ return `<button class='btn' data-ib='1' data-testid='ipo-back'>← Back to IPOs</button>
+ <div class='card ipo' style='margin-top:12px' data-testid='ipo-detail'><div class='row'><h2 style='margin:0' data-testid='ipo-detail-name'>${i.n}</h2><span class='tag' data-testid='ipo-detail-status'>${i.st}</span></div><div class='mu'>${i.sec} · ${i.type} · NSE, BSE</div><div class='mu'>${i.about}</div></div>
+ <div class='grid' style='margin-top:16px'><div class='card'><h3>Key details</h3>
+ <div class='row'><span class='mu'>Valuation</span><b data-testid='ipo-detail-valuation'>${i.val}</b></div><div class='row'><span class='mu'>Issue size</span><b data-testid='ipo-detail-size'>${i.size}</b></div><div class='row'><span class='mu'>Price band</span><b data-testid='ipo-detail-band'>${rs(i.lo)} - ${rs(i.hi)}</b></div><div class='row'><span class='mu'>Lot size</span><b data-testid='ipo-detail-lot'>${i.lot} shares</b></div><div class='row'><span class='mu'>Minimum investment</span><b data-testid='ipo-detail-min'>${rs(mn)}</b></div></div>
+ <div class='card'><h3>Schedule</h3><div class='row'><span class='mu'>Opens</span><b>${i.o}</b></div><div class='row'><span class='mu'>Closes</span><b>${i.c}</b></div><div class='row'><span class='mu'>Allotment</span><b>${i.al}</b></div><div class='row'><span class='mu'>Listing</span><b>${i.li}</b></div></div></div>
+ <div class='card' style='margin-bottom:16px'><h3>Subscription (category-wise)</h3>${tbl}<div class='row' style='margin-top:8px'><span class='mu'>Chance of allotment (retail, 1 lot)</span><b data-testid='ipo-detail-odds'>${odds}</b></div></div>
+ <div class='card scroll' style='margin-bottom:16px'><h3>Who can apply and how much</h3><table data-testid='ipo-detail-limits'><tr><th>Category</th><th>Minimum</th><th>Maximum</th></tr><tr data-testid='ipo-limit-retail'><td>Retail</td><td>1 lot (${rs(mn)})</td><td>${mx} lots (${rs(mx*mn)})</td></tr><tr data-testid='ipo-limit-nii'><td>NII / HNI</td><td>${mx+1} lots (${rs((mx+1)*mn)})</td><td>No limit</td></tr></table><div class='mu' style='margin-top:6px'>Every bid must be at least ${rs(MINV)}.</div></div>
+ ${i.st=='OPEN'?`<button class='btn p' data-ipo='${id}' data-testid='ipo-detail-apply-${id}'>Apply for ${i.n}</button>`:`<button class='btn' disabled data-testid='ipo-detail-apply-${id}'>${up?'Opens '+i.o:'Bidding closed'}</button>`}`}
+const _vi=V.ipo;V.ipo=()=>{if(idet)return detailV();let h=_vi();
+ h=h.replace("data-testid='ipo-tab-previous'>Previous IPOs (0)",`data-testid='ipo-tab-previous'>Previous IPOs (${PREV.length})`);
+ if(itab=='previous')return h.replace("<div class='grid'></div>",prevV());
+ IPO.forEach(i=>{h=h.replace(`<b data-testid='ipo-name-${i.id}'>`,`<b data-iv='${i.id}' style='cursor:pointer;color:var(--bl)' data-testid='ipo-name-${i.id}'>`).replace(`<details data-testid='ipo-details-${i.id}'>`,`<button class='btn' data-iv='${i.id}' data-testid='ipo-view-${i.id}'>View details</button><details data-testid='ipo-details-${i.id}'>`)});return h};
+$('[data-testid=nav-ipo]').addEventListener('click',()=>{idet=null},true);
+
+/* ===== ORDER MANAGEMENT v2: trigger pending, partial fills, validations, charges, GTT, basket, convert, T+1, trades ===== */
+const LEV={IT:5,Banking:5,FMCG:5,Auto:4,Pharma:4,Energy:3,Metals:3},lev=s=>LEV[S[s].sec];
+const FREEZE=10000,MODMAX=5,TICK=0.05,isTick=v=>Math.abs(v/TICK-Math.round(v/TICK))<1e-6;
+const lim=s=>{const x=S[s],b=[5,10,20][s.charCodeAt(0)%3]/100;return[+(x.pc*(1-b)).toFixed(2),+(x.pc*(1+b)).toFixed(2)]};
+const nxid=()=>'2611'+String(D.xn=(D.xn||0)+1).padStart(9,'0'),isP=o=>o.st=='OPEN'||o.st=='TRIGGER PENDING';
+const reqM=(o,px)=>(o.q-(o.fq||0))*px*(o.prod=='CNC'?1:1/lev(o.s)),OPT=ALL.map(x=>`<option>${x.s}</option>`).join('');
+let lastPf=0,GE=null;
+function chg(o,px,q){if(D.mkt.ch===0)return{t:0};const T=q*px,br=o.prod=='MIS'?Math.min(20,.0003*T):0,stt=o.prod=='CNC'?.001*T:(o.side=='SELL'?.00025*T:0),tx=.0000307*T,sb=.000001*T,sd=o.side=='BUY'?(o.prod=='CNC'?.00015:.00003)*T:0;return{t:br+stt+tx+sb+sd+.18*(br+tx+sb)}}
+function setLtp(s,p){const x=S[s],b=lim(s);x.p=+Math.min(b[1],Math.max(b[0],Math.round(p/TICK)*TICK)).toFixed(2);x.c=(x.p-x.pc)/x.pc*100;D.px[s]=x.p}
+function tp(o){if((o.type=='SL'||o.type=='SL-M')&&!o.trd){if(o.st!='TRIGGER PENDING'){o.st='TRIGGER PENDING';log(o,'Waiting for trigger price '+f(o.trig))}}else if(o.st=='TRIGGER PENDING')o.st='OPEN'}
+function can(o,l){const b=o.side=='BUY';if(o.type=='MARKET')return true;if(o.type=='LIMIT')return b?l<=o.px:l>=o.px;
+ if(!o.trd&&(b?l>=o.trig:l<=o.trig)){o.trd=true;if(o.st=='TRIGGER PENDING')o.st='OPEN';log(o,'Trigger price hit at LTP '+f(l))}
+ if(!o.trd)return false;return o.type=='SL-M'||(b?l<=o.px:l>=o.px)}
+function short(o,px){if(o.prod=='CNC'&&o.side=='SELL')return false;const pp=D.pos.find(y=>y.s==o.s),d=o.side=='BUY'?1:-1;if(o.prod=='MIS'&&pp&&pp.q&&Math.sign(pp.q)!=d)return false;return reqM(o,px)>avail()}
+function run(o,price,qty){qty=qty||(o.q-(o.fq||0));const x=o.s,d=o.side=='BUY'?1:-1,c=chg(o,price,qty);let pl=0;
+ if(o.prod=='CNC'){const h=D.hold.find(y=>y.s==x);
+  if(d>0){D.cash-=qty*price;if(h){h.a=(h.a*h.q+price*qty)/(h.q+qty);h.q+=qty;h.t1=(h.t1||0)+qty;h.t1c=(h.t1c||0)+qty*price}else D.hold.push({s:x,q:qty,a:price,t1:qty,t1c:qty*price})}
+  else{pl=(price-h.a)*qty;D.cash+=qty*price;D.hh.push({s:x,q:qty,bp:h.a,sp:price,pl,t:nowT(),id:o.id});h.q-=qty;if(!h.q)D.hold=D.hold.filter(y=>y!=h)}}
+ else{let p=D.pos.find(y=>y.s==x);if(!p){p={s:x,q:0,a:price,r:0,bq:0,sq:0,ba:0,sa:0};D.pos.push(p)}
+  if(!p.q){p.bq=p.sq=p.ba=p.sa=0}
+  if(d>0){p.ba=(p.ba*p.bq+price*qty)/(p.bq+qty);p.bq+=qty}else{p.sa=(p.sa*p.sq+price*qty)/(p.sq+qty);p.sq+=qty}
+  if(!p.q||Math.sign(p.q)==d){p.a=(Math.abs(p.q)*p.a+qty*price)/(Math.abs(p.q)+qty);p.q+=d*qty}
+  else{const cq=Math.min(qty,Math.abs(p.q));pl=(price-p.a)*cq*Math.sign(p.q);p.r+=pl;D.cash+=pl;p.q+=d*qty;if(p.q&&Math.sign(p.q)==d)p.a=price}}
+ o.ex=((o.ex||0)*(o.fq||0)+price*qty)/((o.fq||0)+qty);o.fq=(o.fq||0)+qty;o.pl=(o.pl||0)+pl;o.xt=nowT();
+ D.cash-=c.t;D.chg=(D.chg||0)+c.t;let fee=0;if(o.auto&&!o.afee){o.afee=1;fee=59;D.cash-=fee;D.chg+=fee}
+ D.tr=D.tr||[];const tid='T'+(D.tn=(D.tn||0)+1);D.tr.push({id:tid,o:o.id,x:o.xid,s:x,side:o.side,prod:o.prod,q:qty,px:price,t:nowT(),c:c.t+fee});
+ o.st=o.fq>=o.q?'COMPLETE':'OPEN';
+ log(o,(o.st=='COMPLETE'?'Executed ':'Partially executed ')+qty+' @ '+f(price)+' ('+o.fq+'/'+o.q+')'+(pl?' | realized P&L '+sg(pl):'')+(c.t+fee?' | charges '+f(c.t+fee):''))}
+function fill(o,px){const rem=o.q-(o.fq||0);if(short(o,px)){o.st='REJECTED';o.why='RMS: insufficient margin at execution';log(o,'Rejected: '+o.why);return}
+ run(o,px,D.mkt.pf&&!o.fq&&rem>1?Math.ceil(rem*.4):rem)}
+function evalGtt(){let ch=false;(D.gtt||[]).filter(g=>g.st=='ACTIVE').forEach(g=>{const l=S[g.s].p;let leg=null,px=0;
+ if(g.type=='SINGLE'){if(g.dir=='UP'?l>=g.t1:l<=g.t1){leg='SINGLE';px=g.p1}}else{if(l<=g.t1){leg='STOPLOSS';px=g.p1}else if(l>=g.t2){leg='TARGET';px=g.p2}}
+ if(leg){g.st='TRIGGERED';g.leg=leg;const r=place({s:g.s,side:g.type=='OCO'?'SELL':g.side,prod:'CNC',type:'LIMIT',q:g.q,px,trig:0,amo:false,val:'DAY',gtt:g.id});g.oid=r.id;g.h.push({t:nowT(),m:'Triggered ('+leg+') at LTP '+f(l)+' - order '+r.id+' '+r.st});ch=true}});return ch}
+function evalAll(){let ch=false;if(D.mkt.st=='OPEN'){D.orders.filter(isP).forEach(o=>{const l=S[o.s].p;if(!o.xid)o.xid=nxid();if(can(o,l)){fill(o,l);ch=true}else tp(o)});if(evalGtt())ch=true}save();return ch}
+function place(o,editId){const ltp=S[o.s].p,old=editId&&oid(editId),closed=D.mkt.st!='OPEN',b=lim(o.s);
+ if(old&&(old.mods||0)>=MODMAX){toast('Modification limit reached ('+MODMAX+' per order). Cancel and place a new order.');return old}
+ o.id=editId||String(++D.n);o.t=old?old.t:nowT();o.h=old?old.h:[];o.ss=old?old.ss:D.mkt.sess;o.st='OPEN';o.mods=old?(old.mods||0)+1:0;
+ if(old)['cv','fq','ex','pl','xid','trd','gtt','auto','afee'].forEach(k=>{if(old[k]!==undefined)o[k]=old[k]});
+ log(o,old?'Modified: qty '+o.q+', price '+(o.px||'MKT')+', trigger '+(o.trig||'-'):'Order placed (session '+o.ss+')');
+ const rej=m=>{o.st='REJECTED';o.why=m;log(o,'Rejected: '+m)},pz=[o.px,o.trig].filter(v=>v);
+ if(closed&&!o.amo)rej('Market closed - place as AMO');
+ else if(o.q>FREEZE)rej('Quantity '+o.q+' exceeds the freeze limit of '+FREEZE+' per order');
+ else if(o.q<(o.fq||0))rej('Quantity cannot be less than the executed quantity '+o.fq);
+ else if(pz.some(v=>!isTick(v)))rej('Price must be a multiple of the tick size '+TICK);
+ else if(pz.some(v=>v<b[0]||v>b[1]))rej('Price outside circuit limits '+f(b[0])+' - '+f(b[1]));
+ else if((o.type=='MARKET'||o.type=='SL-M')&&!o.amo&&(ltp<=b[0]*1.005||ltp>=b[1]*.995))rej('Market protection: stock is at its circuit limit. Use a LIMIT order');
+ else if(o.side=='SELL'&&o.prod=='CNC'){const h=D.hold.find(y=>y.s==o.s),t1=h&&D.mkt.t1!==0?(h.t1||0):0,av=h?h.q-t1-resv(o.s,'CNC','SELL',editId):0;if(av<o.q)rej('RMS: Insufficient holdings. Available to sell '+Math.max(0,av)+(t1?' ('+t1+' T1 shares settle tomorrow)':''))}
+ else if(o.xit&&o.q>Math.abs((D.pos.find(y=>y.s==o.s)||{q:0}).q)-resv(o.s,'MIS',o.side,editId))rej('Exit quantity exceeds available position quantity');
+ if(o.st=='OPEN'&&short(o,o.px||ltp))rej('RMS: Margin exceeds. Required '+f(reqM(o,o.px||ltp))+', available '+f(avail()));
+ if(o.st=='OPEN'){if(!o.xid&&!o.amo)o.xid=nxid();
+  if(o.amo){o.st='AMO REQ RECEIVED';log(o,'AMO accepted - queued for next market session')}
+  else{if(can(o,ltp))fill(o,ltp);else tp(o);
+   if(isP(o)&&o.val=='IOC'){o.st='CANCELLED';o.why='IOC: unfilled quantity cancelled';log(o,'Cancelled: IOC')}
+   else if(o.st=='OPEN')log(o,'Order pending at exchange')}}
+ if(old)D.orders[D.orders.findIndex(y=>y.id==editId)]=o;else D.orders.push(o);
+ save();toast('Order '+o.id+': '+o.st+(o.why?' - '+o.why:''));return o}
+function T(){const m=D.mkt,end=m.start+m.dur*60000,ld=sqLead();
+ if(m.st=='OPEN'&&ld&&Date.now()>=end-ld&&m.sqd!==m.sess)autoSq();
+ if(m.st=='OPEN'&&Date.now()>=end)closeMkt();
+ if(D.mkt.st=='OPEN'&&m.sim=='auto'&&Date.now()-lastStep>=m.iv*1000){lastStep=Date.now();step()}
+ if(D.mkt.st=='OPEN'&&Date.now()-lastPf>3000&&D.orders.some(o=>o.st=='OPEN'&&o.fq&&o.fq<o.q)){lastPf=Date.now();evalAll();render()}
+ mbar()}
+const _s3=startSession;startSession=()=>{D.hold.forEach(h=>{h.t1=0;h.t1c=0});_s3()};
+$('#mkPf').onchange=e=>{D.mkt.pf=+e.target.value;save()};$('#mkT1').onchange=e=>{D.mkt.t1=+e.target.value;save()};$('#mkCh').onchange=e=>{D.mkt.ch=+e.target.value;save()};
+const _mb2=mbar;mbar=()=>{_mb2();const m=D.mkt;sv($('#mkPf'),m.pf?1:0);sv($('#mkT1'),m.t1===0?0:1);sv($('#mkCh'),m.ch===0?0:1)};
+const _o2=openOrder;openOrder=(s,sd,id)=>{_o2(s,sd,id);const b=lim(M.sym);$('#oInfo').textContent='Circuit limits '+f(b[0])+' - '+f(b[1])+' · Tick size '+TICK+' · MIS leverage '+lev(M.sym)+'x · Max qty '+FREEZE};
+
+/* orders table */
+OT.open=o=>isP(o);
+const rowO2=x=>{const op=isP(x)||x.st=='AMO REQ RECEIVED',tg=x.auto?'AUTO SQ-OFF':x.xit?'EXIT':'';return `<tr data-testid='order-row-${x.id}'><td>${x.t}</td><td class='${x.side=='BUY'?'up':'dn'}' data-testid='order-side-${x.id}'>${x.side}</td><td data-testid='order-sym-${x.id}'>${x.s}${tg?` <span class='tag'>${tg}</span>`:''}${x.gtt?` <span class='tag'>GTT</span>`:''}</td><td data-testid='order-type-${x.id}'>${x.prod} / ${x.type}${x.amo?` <span class='tag'>AMO</span>`:''}</td><td>${x.val||'DAY'}</td><td><span data-testid='order-filled-${x.id}'>${x.fq||0}</span>/<span data-testid='order-qty-${x.id}'>${x.q}</span></td><td data-testid='order-price-${x.id}'>${x.px?f(x.px):'MKT'}</td><td data-testid='order-trig-${x.id}'>${x.trig?f(x.trig):'-'}</td><td data-testid='order-exec-${x.id}'>${x.ex?f(x.ex):'-'}</td><td data-testid='order-xid-${x.id}'>${x.xid||'-'}</td>
+<td class='st-${x.st=='AMO REQ RECEIVED'||x.st=='TRIGGER PENDING'?'OPEN':x.st}' data-testid='order-status-${x.id}'>${x.st}${x.why?` <span class='mu'>(${x.why})</span>`:''}<details data-testid='order-history-${x.id}'><summary class='mu'>History</summary>${(x.h||[]).map(h=>`<div class='mu'>${h.t} · ${h.st} · ${h.m}</div>`).join('')}</details></td>
+<td>${op?`<button class='btn' data-mod='${x.id}' data-testid='modify-${x.id}'>Modify</button> ${x.st=='OPEN'?`<button class='btn' data-exec='${x.id}' data-testid='execute-${x.id}' ${D.mkt.st!='OPEN'?'disabled':''}>Execute</button> `:''}<button class='btn' data-can='${x.id}' data-testid='cancel-${x.id}'>Cancel</button>`:''}</td></tr>`};
+V.orders=()=>{const all=[...D.orders].reverse(),l=all.filter(OT[otab]);
+ return `<h2>Orders (${all.length})</h2><div class='pills' data-testid='orders-tabs'>${Object.keys(OT).map(k=>`<button class='pill ${k==otab?'on':''}' data-ot='${k}' data-testid='orders-tab-${k}'>${LB[k]} (${D.orders.filter(OT[k]).length})</button>`).join('')}</div>
+ <div class='card scroll'><table data-testid='orders-table'><tr><th>Time</th><th>Side</th><th>Instrument</th><th>Product / type</th><th>Validity</th><th>Filled / Qty</th><th>Price</th><th>Trigger</th><th>Avg exec</th><th>Exchange order ID</th><th>Status</th><th></th></tr>${l.length?l.map(rowO2).join(''):"<tr><td colspan='12' class='mu' data-testid='orders-empty'>No orders</td></tr>"}</table></div>`};
+
+/* trade book */
+V.trades=()=>{const T=(D.tr||[]).slice().reverse(),tot=T.reduce((t,x)=>t+x.q*x.px,0),ch=T.reduce((t,x)=>t+x.c,0);
+ return `<h2>Trades (${T.length})</h2><div class='grid'><div class='card'><div class='mu'>Turnover</div><b data-testid='trades-turnover'>${f(tot)}</b></div><div class='card'><div class='mu'>Total charges</div><b class='dn' data-testid='trades-charges'>${f(ch)}</b></div></div>
+ <div class='card scroll'><table data-testid='trades-table'><tr><th>Trade ID</th><th>Order ID</th><th>Exchange order ID</th><th>Instrument</th><th>Side</th><th>Product</th><th>Qty</th><th>Price</th><th>Charges</th><th>Time</th></tr>${T.length?T.map(x=>`<tr data-testid='trade-row-${x.id}'><td>${x.id}</td><td data-testid='trade-order-${x.id}'>${x.o}</td><td>${x.x||'-'}</td><td>${x.s}</td><td class='${x.side=='BUY'?'up':'dn'}'>${x.side}</td><td>${x.prod}</td><td data-testid='trade-qty-${x.id}'>${x.q}</td><td data-testid='trade-price-${x.id}'>${f(x.px)}</td><td data-testid='trade-charges-${x.id}'>${f(x.c)}</td><td>${x.t}</td></tr>`).join(''):"<tr><td colspan='10' class='mu' data-testid='trades-empty'>No trades yet</td></tr>"}</table></div>`};
+
+/* positions: exit all, add, convert */
+const _vp2=V.positions;V.positions=()=>{let h=_vp2();D.pos.filter(p=>p.q).forEach(p=>{h=h.replace(`<button class='btn' data-xit='${p.s}' data-testid='exit-${p.s}'>Exit</button>`,`<button class='btn' data-xit='${p.s}' data-testid='exit-${p.s}'>Exit</button> <button class='btn' data-padd='${p.s}' data-testid='pos-add-${p.s}'>Add</button> <button class='btn' data-pcv='${p.s}' data-testid='pos-convert-${p.s}'>Convert to CNC</button>`)});
+ return h.replace('<h2>Positions</h2>',`<h2>Positions</h2><div style='margin:6px 0'><button class='btn s' data-xall='1' data-testid='exit-all'>Exit all</button></div>`)};
+function exitAll(){if(D.mkt.st!='OPEN')return toast('Market is closed');const l=D.pos.filter(p=>p.q);if(!l.length)return toast('No open positions');
+ D.orders.forEach(o=>{if(isP(o)&&o.prod=='MIS'&&o.xit){o.st='CANCELLED';o.why='Cancelled by Exit all';log(o,'Cancelled by Exit all')}});
+ l.forEach(p=>place({s:p.s,side:p.q>0?'SELL':'BUY',prod:'MIS',type:'MARKET',q:Math.abs(p.q),px:0,trig:0,amo:false,val:'DAY',xit:true}));view='orders';otab='all';location.hash='orders';render();toast('Exit all: '+l.length+' position(s) exited')}
+function convPos(s){const p=D.pos.find(y=>y.s==s);if(!p||p.q<=0)return toast('Only long MIS positions can be converted to CNC');
+ if(resv(s,'MIS','SELL')>0)return toast('Cancel pending MIS orders for '+s+' before converting');
+ const full=p.q*p.a,extra=full-full/lev(s);if(extra>avail())return toast('RMS: Margin exceeds for conversion. Required additional '+f(extra)+', available '+f(avail()));
+ D.cash-=full;const h=D.hold.find(y=>y.s==s);if(h){h.a=(h.a*h.q+full)/(h.q+p.q);h.q+=p.q;h.t1=(h.t1||0)+p.q;h.t1c=(h.t1c||0)+full}else D.hold.push({s,q:p.q,a:p.a,t1:p.q,t1c:full});
+ p.q=0;save();render();toast(s+': MIS position converted to CNC (see Holdings)')}
+function convHold(s){const h=D.hold.find(y=>y.s==s);if(!h||!(h.t1>0))return;if(D.mkt.st!='OPEN')return toast('Market is closed');
+ const pp=D.pos.find(y=>y.s==s);if(pp&&pp.q<0)return toast('Cannot convert: opposite MIS position exists');
+ const q=h.t1,cost=h.t1c||q*h.a,a=cost/q;D.cash+=cost;if(h.q>q)h.a=(h.a*h.q-cost)/(h.q-q);h.q-=q;h.t1=0;h.t1c=0;if(!h.q)D.hold=D.hold.filter(y=>y!=h);
+ let p=pp;if(!p){p={s,q:0,a,r:0,bq:0,sq:0,ba:0,sa:0};D.pos.push(p)}if(!p.q){p.bq=p.sq=p.ba=p.sa=0}
+ p.a=(p.q*p.a+q*a)/(p.q+q);p.ba=(p.ba*p.bq+q*a)/(p.bq+q);p.bq+=q;p.q+=q;save();render();toast(s+': '+q+' T1 shares converted to MIS')}
+
+/* holdings: T+1 table */
+const _hv=V.holdings;V.holdings=()=>{const t=D.hold.filter(h=>(h.t1||0)>0);return _hv()+`<h3 style='margin-top:20px'>T+1 holdings (bought today, settle next session)</h3><div class='card scroll'><table data-testid='holdings-t1-table'><tr><th>Instrument</th><th>Total qty</th><th>T1 qty</th><th>Available to sell</th><th></th></tr>${t.length?t.map(h=>`<tr data-testid='t1-row-${h.s}'><td>${h.s}</td><td>${h.q}</td><td data-testid='t1-qty-${h.s}'>${h.t1}</td><td data-testid='t1-avail-${h.s}'>${D.mkt.t1===0?h.q:h.q-h.t1}</td><td><button class='btn' data-hcv='${h.s}' data-testid='t1-convert-${h.s}'>Convert to MIS</button></td></tr>`).join(''):"<tr><td colspan='5' class='mu' data-testid='t1-empty'>No T+1 holdings</td></tr>"}</table></div>`};
+
+/* funds: charges and margin calculator */
+function mcOut(s,prod,q,px){px=px||S[s].p;const L=prod=='CNC'?1:lev(s),req=q*px/L,c=chg({prod,side:'BUY'},px,q);return `<div class='row'><span class='mu'>Leverage</span><b data-testid='margin-leverage'>${L}x</b></div><div class='row'><span class='mu'>Margin required</span><b data-testid='margin-required'>${f(req)}</b></div><div class='row'><span class='mu'>Estimated charges (buy side)</span><b data-testid='margin-charges'>${f(c.t)}</b></div><div class='row'><span class='mu'>Available margin</span><b data-testid='margin-available'>${f(avail())}</b></div><div class='row'><span class='mu'>Can place order?</span><b class='${req<=avail()?'up':'dn'}' data-testid='margin-ok'>${req<=avail()?'Yes':'No - add funds'}</b></div>`}
+const _fu2=V.funds;V.funds=()=>_fu2()+`<div class='grid'><div class='card' data-testid='charges-card'><h3>Charges</h3><div class='row'><span>Total charges paid</span><b class='dn' data-testid='funds-charges'>${f(D.chg||0)}</b></div><div class='mu'>Brokerage, STT, exchange fees, SEBI fee, stamp duty and GST (demo rates). Auto square-off fee: 59.00 per order.</div></div>
+ <div class='card' id='mcalc' data-testid='margin-calc'><h3>Margin calculator</h3><div class='grid' style='margin:0 0 8px'><label class='fl'>Stock<select id='mcSym' data-testid='margin-symbol'>${OPT}</select></label><label class='fl'>Product<select id='mcProd' data-testid='margin-product'><option>CNC</option><option>MIS</option></select></label><label class='fl'>Quantity<input type='number' id='mcQty' data-testid='margin-qty' min='1' value='1'></label><label class='fl'>Price (blank = LTP)<input type='number' id='mcPx' data-testid='margin-price' step='0.05'></label></div><div id='mcOut'>${mcOut(ALL[0].s,'CNC',1,0)}</div></div></div>`;
+['input','change'].forEach(ev=>$('#main').addEventListener(ev,e=>{if(e.target.closest('#mcalc'))$('#mcOut').innerHTML=mcOut($('#mcSym').value,$('#mcProd').value,+$('#mcQty').value||0,+$('#mcPx').value||0)}));
+
+/* GTT */
+V.gtt=()=>{const G=D.gtt=D.gtt||[];return `<h2>GTT (Good Till Triggered)</h2><div class='mu' data-testid='gtt-note'>GTT orders stay active across sessions (valid 1 year in a real broker) and place a LIMIT order when the trigger price is hit during market hours.</div><div style='margin:10px 0'><button class='btn p' data-gnew='1' data-testid='gtt-new'>New GTT</button></div>
+ <div class='card scroll'><table data-testid='gtt-table'><tr><th>ID</th><th>Stock</th><th>Type</th><th>Side</th><th>Qty</th><th>Trigger</th><th>Limit price</th><th>Status</th><th>Order</th><th></th></tr>${G.length?G.slice().reverse().map(g=>`<tr data-testid='gtt-row-${g.id}'><td>${g.id}</td><td>${g.s}</td><td>${g.type}</td><td>${g.type=='OCO'?'SELL':g.side}</td><td>${g.q}</td><td data-testid='gtt-trigger-${g.id}'>${g.type=='OCO'?'SL '+f(g.t1)+' / TGT '+f(g.t2):(g.dir=='UP'?'rises to ':'falls to ')+f(g.t1)}</td><td data-testid='gtt-price-${g.id}'>${g.type=='OCO'?f(g.p1)+' / '+f(g.p2):f(g.p1)}</td><td class='${g.st=='ACTIVE'?'st-OPEN':g.st=='TRIGGERED'?'up':'dn'}' data-testid='gtt-status-${g.id}'>${g.st}${g.leg&&g.type=='OCO'?' ('+g.leg+')':''}<details><summary class='mu'>History</summary>${g.h.map(h=>`<div class='mu'>${h.t} · ${h.m}</div>`).join('')}</details></td><td data-testid='gtt-order-${g.id}'>${g.oid||'-'}</td><td>${g.st=='ACTIVE'?`<button class='btn' data-gm='${g.id}' data-testid='gtt-modify-${g.id}'>Modify</button> <button class='btn' data-gc='${g.id}' data-testid='gtt-cancel-${g.id}'>Cancel</button>`:''}</td></tr>`).join(''):"<tr><td colspan='10' class='mu' data-testid='gtt-empty'>No GTT orders</td></tr>"}</table></div>`};
+function openGtt(id){D.gtt=D.gtt||[];const g=id&&D.gtt.find(y=>y.id==id);GE=id||null;$('#gSym').innerHTML=OPT;
+ $('#gTitle').textContent=g?'Modify GTT '+g.id:'New GTT';$('#gType').value=g?g.type:'SINGLE';$('#gType').disabled=!!g;$('#gSym').value=g?g.s:ALL[0].s;$('#gSym').disabled=!!g;$('#gSide').value=g?g.side:'BUY';$('#gSide').disabled=!!g;$('#gQty').value=g?g.q:1;
+ $('#gT1').value=g?g.t1:'';$('#gP1').value=g?g.p1:'';$('#gT2').value=g&&g.type=='OCO'?g.t2:'';$('#gP2').value=g&&g.type=='OCO'?g.p2:'';$('#gErr').textContent='';gs();$('#gv').classList.add('show')}
+function gs(){const oco=$('#gType').value=='OCO';$('#gLeg2').style.display=oco?'grid':'none';$('#gSideL').style.display=oco?'none':'grid';$('#gT1T').textContent=oco?'Stoploss trigger':'Trigger price';$('#gP1T').textContent=oco?'Stoploss limit price':'Limit price';$('#gLtp').textContent='LTP '+f(S[$('#gSym').value].p);$('#gSubmit').textContent=GE?'Modify GTT':'Create GTT'}
+['input','change'].forEach(ev=>$('#gm').addEventListener(ev,gs));
+$('#gClose').onclick=()=>$('#gv').classList.remove('show');$('#gv').onclick=e=>{if(e.target.id=='gv')$('#gv').classList.remove('show')};
+$('#gSubmit').onclick=()=>{D.gtt=D.gtt||[];const oco=$('#gType').value=='OCO',s=$('#gSym').value,l=S[s].p,b=lim(s),q=+$('#gQty').value,t1=+$('#gT1').value,p1=+$('#gP1').value,t2=+$('#gT2').value,p2=+$('#gP2').value,side=oco?'SELL':$('#gSide').value,E=m=>$('#gErr').textContent=m,old=GE&&D.gtt.find(y=>y.id==GE);
+ if(!Number.isInteger(q)||q<1)return E('Quantity must be a whole number of at least 1');
+ if(q>FREEZE)return E('Quantity exceeds the freeze limit of '+FREEZE);
+ const vals=oco?[t1,p1,t2,p2]:[t1,p1];
+ if(vals.some(v=>!(v>0)))return E('Enter all trigger and limit prices');
+ if(vals.some(v=>!isTick(v)))return E('Prices must be a multiple of the tick size '+TICK);
+ if(vals.some(v=>v<b[0]||v>b[1]))return E('Price outside circuit limits '+f(b[0])+' - '+f(b[1]));
+ const far=v=>Math.abs(v-l)/l>=.0025;
+ if(!far(t1)||(oco&&!far(t2)))return E('Trigger price must be at least 0.25% away from LTP '+f(l));
+ if(oco){if(!(t1<l&&l<t2))return E('For OCO: stoploss trigger must be below LTP and target trigger above LTP');const h=D.hold.find(y=>y.s==s);if(!h||h.q<q)return E('OCO GTT needs holdings. You hold '+(h?h.q:0)+' of '+s)}
+ const rec={id:old?old.id:'G'+(D.gn=(D.gn||7000)+1),type:oco?'OCO':'SINGLE',s,side,q,t1,p1,t2:oco?t2:0,p2:oco?p2:0,dir:t1>=l?'UP':'DOWN',st:'ACTIVE',t:old?old.t:nowT(),h:old?old.h:[]};
+ rec.h.push({t:nowT(),m:(old?'Modified':'Created')+' at LTP '+f(l)});
+ if(old)D.gtt[D.gtt.indexOf(old)]=rec;else D.gtt.push(rec);save();$('#gv').classList.remove('show');view='gtt';location.hash='gtt';render();toast('GTT '+rec.id+(old?' modified':' created'))};
+
+/* basket */
+V.basket=()=>{const B=D.bk=D.bk||[];return `<h2>Basket</h2><div class='card' data-testid='basket-form'><div class='grid' style='margin:0'><label class='fl'>Stock<select id='bSym' data-testid='basket-symbol'>${OPT}</select></label><label class='fl'>Side<select id='bSide' data-testid='basket-side'><option>BUY</option><option>SELL</option></select></label><label class='fl'>Product<select id='bProd' data-testid='basket-product'><option>CNC</option><option>MIS</option></select></label><label class='fl'>Order type<select id='bType' data-testid='basket-type'><option>MARKET</option><option>LIMIT</option></select></label><label class='fl'>Quantity<input type='number' id='bQty' data-testid='basket-qty' min='1' value='1'></label><label class='fl'>Price (limit only)<input type='number' id='bPx' data-testid='basket-price' step='0.05'></label></div><div class='err' id='bErr' data-testid='basket-error' role='alert'></div><button class='btn p' data-bad='1' data-testid='basket-add'>Add to basket</button></div>
+ <div class='card scroll' style='margin-top:16px'><table data-testid='basket-table'><tr><th>#</th><th>Stock</th><th>Side</th><th>Product</th><th>Type</th><th>Qty</th><th>Price</th><th></th></tr>${B.length?B.map((l,i)=>`<tr data-testid='basket-row-${i+1}'><td>${i+1}</td><td>${l.s}</td><td>${l.side}</td><td>${l.prod}</td><td>${l.type}</td><td>${l.q}</td><td>${l.px?f(l.px):'MKT'}</td><td><button class='btn' data-brm='${i}' data-testid='basket-remove-${i+1}'>Remove</button></td></tr>`).join(''):"<tr><td colspan='8' class='mu' data-testid='basket-empty'>Basket is empty</td></tr>"}</table></div>${B.length?`<div style='margin-top:12px'><button class='btn s' data-bpl='1' data-testid='basket-place'>Place basket (${B.length})</button></div>`:''}`};
+function addLeg(){const B=D.bk=D.bk||[],type=$('#bType').value,q=+$('#bQty').value,px=+$('#bPx').value,E=m=>$('#bErr').textContent=m;
+ if(!Number.isInteger(q)||q<1)return E('Quantity must be a whole number of at least 1');if(type=='LIMIT'&&!(px>0))return E('Enter a limit price');
+ B.push({s:$('#bSym').value,side:$('#bSide').value,prod:$('#bProd').value,type,q,px:type=='LIMIT'?px:0});save();render()}
+function placeBasket(){const B=D.bk||[],res=B.map(l=>place({s:l.s,side:l.side,prod:l.prod,type:l.type,q:l.q,px:l.px,trig:0,amo:D.mkt.st!='OPEN',val:'DAY'}));D.bk=[];save();const bad=res.filter(r=>r.st=='REJECTED').length;view='orders';otab='all';location.hash='orders';render();toast('Basket: '+res.length+' orders sent, '+bad+' rejected')}
+
+/* click handlers for the new buttons */
+$('#main').addEventListener('click',e=>{const t=e.target.closest('[data-gnew],[data-gm],[data-gc],[data-bad],[data-brm],[data-bpl],[data-xall],[data-padd],[data-pcv],[data-hcv]');if(!t)return;const d=t.dataset;
+ if(d.gnew)openGtt();else if(d.gm)openGtt(d.gm);
+ else if(d.gc){const g=D.gtt.find(y=>y.id==d.gc);g.st='CANCELLED';g.h.push({t:nowT(),m:'Cancelled by user'});save();render();toast('GTT '+g.id+' cancelled')}
+ else if(d.bad)addLeg();else if(d.brm){D.bk.splice(+d.brm,1);save();render()}else if(d.bpl)placeBasket();else if(d.xall)exitAll();
+ else if(d.padd){const p=D.pos.find(y=>y.s==d.padd);openOrder(d.padd,p.q>0?'BUY':'SELL');$('input[name=prod][value=MIS]').checked=true;sync()}
+ else if(d.pcv)convPos(d.pcv);else if(d.hcv)convHold(d.hcv)});
+
+setInterval(T,1000);T();
+try{if(sessionStorage.getItem("kl_user"))start()}catch(e){}
+</script></body></html>
